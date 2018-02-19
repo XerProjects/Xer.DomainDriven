@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Xer.DomainDriven.Repositories
 {
-    public interface IAggregateAsyncRepository<TAggregate, TAggregateId> where TAggregate : IAggregate<TAggregateId> 
+    public interface IAggregateAsyncRepository<TAggregate, TAggregateId> where TAggregate : IAggregateRoot<TAggregateId> 
                                                                          where TAggregateId : IEquatable<TAggregateId>
     {
         Task SaveAsync(TAggregate aggregate, CancellationToken cancellationToken = default(CancellationToken));

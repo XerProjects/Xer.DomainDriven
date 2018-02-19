@@ -68,19 +68,19 @@ namespace Xer.DomainDriven
 
         #region HashCode Class
         
-        protected class HashCode
+        protected struct HashCode
         {
             private readonly int _value;
             
-            public HashCode(params object[] valueObjectFields)
+            private HashCode(object[] fields)
             {
                 unchecked
-                {
-                    int hash = 19;
+                {                    
+                    int hash = fields.Length > 0 ? 19 : 0;
 
-                    foreach(object field in valueObjectFields)
+                    for (int i = 0; fields.Length > 0; i++)
                     {
-                        hash = hash * 486187739 + field.GetHashCode();
+                        hash = hash * 486187739 + fields[i].GetHashCode();
                     }
 
                     _value = hash;                
@@ -90,6 +90,11 @@ namespace Xer.DomainDriven
             public static implicit operator int(HashCode hashCode)
             {
                 return hashCode._value;
+            }
+
+            public static HashCode From(object field, params object[] otherFields)
+            {
+                return new HashCode(otherFields.Length > 0 ? new[] { field, otherFields } : new[] { field });
             }
         }
 

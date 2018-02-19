@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xer.DomainDriven.Exceptions;
@@ -9,7 +8,7 @@ using Xer.DomainDriven.Exceptions;
 namespace Xer.DomainDriven.Repositories
 {
     public class InMemoryAggregateRepository<TAggregate> : InMemoryAggregateRepository<TAggregate, Guid>
-                                                           where TAggregate : IAggregate<Guid>
+                                                           where TAggregate : IAggregateRoot<Guid>
     {
         public InMemoryAggregateRepository()
         {
@@ -22,7 +21,7 @@ namespace Xer.DomainDriven.Repositories
 
     public class InMemoryAggregateRepository<TAggregate, TAggregateId> : IAggregateRepository<TAggregate, TAggregateId>, 
                                                                          IAggregateAsyncRepository<TAggregate, TAggregateId> 
-                                                                         where TAggregate : IAggregate<TAggregateId>
+                                                                         where TAggregate : IAggregateRoot<TAggregateId>
                                                                          where TAggregateId : IEquatable<TAggregateId>
     {
         #region Declarations

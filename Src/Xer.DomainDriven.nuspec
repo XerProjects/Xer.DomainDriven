@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xer.DomainDriven</id>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <title>Xer.DomainDriven</title>
     <authors>jeyjeyemem</authors>
     <owners>jeyjeyemem</owners>
@@ -11,7 +11,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>DDD entities and marker interfaces.</description>
     <summary>DDD entities and marker interfaces</summary>
-    <releaseNotes>Initial release.</releaseNotes>
+    <releaseNotes>
+    - Renamed Aggregate to AggregateRoot. - Update implementation of ValueObject.
+    </releaseNotes>
     <copyright>Copyright 2017</copyright>
     <tags>DDD</tags>
   </metadata>
