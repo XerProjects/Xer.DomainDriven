@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xer.DomainDriven", "Src\Xer.DomainDriven.csproj", "{B158F4B9-C157-411A-85FB-3F538432A92F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xer.DomainDriven", "Src\Xer.DomainDriven\Xer.DomainDriven.csproj", "{B158F4B9-C157-411A-85FB-3F538432A92F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
