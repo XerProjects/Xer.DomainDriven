@@ -10,12 +10,12 @@ namespace Xer.DomainDriven
         public TId Id { get; protected set; }
 
         /// <summary>
-        /// Date created.
+        /// Date when entitity was created.
         /// </summary>
         public DateTime Created { get; protected set; }
 
         /// <summary>
-        /// Date updated.
+        /// Date when entity was last updated.
         /// </summary>
         public DateTime Updated { get; protected set; }
 

@@ -10,12 +10,12 @@ namespace Xer.DomainDriven
         TId Id { get; }
 
         /// <summary>
-        /// Date when object was created.
+        /// Date when entity was created.
         /// </summary>
         DateTime Created { get; }
 
         /// <summary>
-        /// Date when object was last updated.
+        /// Date when entity was last updated.
         /// </summary>
         DateTime Updated { get; }
     }
