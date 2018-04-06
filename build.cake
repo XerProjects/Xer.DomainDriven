@@ -17,6 +17,7 @@ var configuration = Argument<string>("configuration", "Release");
 
 var solutions = GetFiles("./**/*.sln");
 var projects = GetFiles("./**/*.csproj").Select(x => x.GetDirectory());
+string buildArtifactsDirectory = "./BuildArtifacts";
 
 GitVersion gitVersion;
 
@@ -46,6 +47,13 @@ Setup(context =>
     Information("Publish to myget: {0}", BuildParameters.Instance.ShouldPublishMyGet);
     Information("Publish to nuget: {0}", BuildParameters.Instance.ShouldPublishNuGet);
     Information("///////////////////////////////////////////////////////////////////////////////");
+    
+    if (DirectoryExists(buildArtifactsDirectory))
+    {
+        // Cleanup build artifacts.
+        Information($"Cleaning up {buildArtifactsDirectory} directory.");
+        DeleteDirectory(buildArtifactsDirectory, new DeleteDirectorySettings { Recursive = true });
+    }    
 });
 
 Teardown(context =>
@@ -164,7 +172,7 @@ Task("Pack")
     .IsDependentOn("Test")
     .Does(() =>
 {
-    var projects = GetFiles("./src/**/*.csproj");
+    var projects = GetFiles("./Src/**/*.csproj");
     
     if (projects.Count() == 0)
     {
@@ -174,9 +182,9 @@ Task("Pack")
 
     var settings = new DotNetCorePackSettings 
     {
-        OutputDirectory = "./BuildArtifacts",
-        NoBuild = true,
+        OutputDirectory = buildArtifactsDirectory,
         Configuration = configuration,
+        NoBuild = true,
         ArgumentCustomization = (args) => args
             .Append("/p:Version={0}", gitVersion.LegacySemVerPadded)
             .Append("/p:AssemblyVersion={0}", gitVersion.MajorMinorPatch)
@@ -195,7 +203,8 @@ Task("PublishMyGet")
     .IsDependentOn("Pack")
     .Does(() =>
 {
-    var nupkgs = GetFiles("./**/*.nupkg");
+    // Nupkgs in BuildArtifacts folder.
+    var nupkgs = GetFiles(buildArtifactsDirectory + "/*.nupkg");
     
     if (nupkgs.Count() == 0)
     {
@@ -220,7 +229,8 @@ Task("PublishNuGet")
     .IsDependentOn("Pack")
     .Does(() =>
 {
-    var nupkgs = GetFiles("./**/*.nupkg");
+    // Nupkgs in BuildArtifacts folder.
+    var nupkgs = GetFiles(buildArtifactsDirectory + "/*.nupkg");
 
     if (nupkgs.Count() == 0)
     {

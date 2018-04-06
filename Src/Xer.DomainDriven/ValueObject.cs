@@ -107,11 +107,19 @@ namespace Xer.DomainDriven
             /// <param name="fields">Value object fields.</param>
             private HashCode(object[] fields)
             {
+                if (fields == null)
+                {
+                    throw new ArgumentNullException(nameof(fields));
+                }
+
+                if (fields.Length == 0)
+                    _value = 0;
+
                 unchecked
                 {                    
-                    int hash = fields.Length > 0 ? 19 : 0;
+                    int hash = 19;
 
-                    for (int i = 0; fields.Length > 0; i++)
+                    for (int i = 0; fields.Length > i; i++)
                     {
                         hash = hash * 486187739 + fields[i]?.GetHashCode() ?? throw new ArgumentException("Cannot pass null as field.", nameof(fields));
                     }
