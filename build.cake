@@ -17,7 +17,7 @@ var configuration = Argument<string>("configuration", "Release");
 
 var solutions = GetFiles("./**/*.sln");
 var projects = GetFiles("./**/*.csproj").Select(x => x.GetDirectory());
-string buildArtifactsDirectory = "./BuildArtifacts";
+var buildArtifactsDirectory = "./BuildArtifacts";
 
 GitVersion gitVersion;
 
@@ -292,6 +292,8 @@ public class BuildParameters
 
     public bool IsLocalBuild => _context.BuildSystem().IsLocalBuild;
 
+    public bool IsPullRequest => _context.BuildSystem().AppVeyor.Environment.PullRequest.IsPullRequest;
+
     public string BranchName
     {
         get
@@ -322,5 +324,6 @@ public class BuildParameters
 
     public bool ShouldPublishNuGet => !string.IsNullOrWhiteSpace(NuGetApiKey) 
         && !string.IsNullOrWhiteSpace(NuGetFeed)
-        && (IsMasterBranch || IsHotFixBranch);
+        && (IsMasterBranch || IsHotFixBranch)
+        && !IsPullRequest;
 }
