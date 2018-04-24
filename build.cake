@@ -26,7 +26,7 @@ BuildParameters buildParameters;
 Setup(context =>
 {
     buildParameters = new BuildParameters(Context);
-    
+        
     // Executed BEFORE the first task.
     Information("Xer.DomainDriven");
     Information("Parameters");
@@ -40,9 +40,9 @@ Setup(context =>
     Information("Dev branch: {0}", buildParameters.IsDevBranch);
     Information("Hotfix branch: {0}", buildParameters.IsHotFixBranch);
     Information("Pull request: {0}", buildParameters.IsPullRequest);
+    Information("Apply git tag: {0} | {1}", buildParameters.ShouldApplyGitTag, buildParameters.GitTagName);
     Information("Publish to myget: {0}", buildParameters.ShouldPublishMyGet);
     Information("Publish to nuget: {0}", buildParameters.ShouldPublishNuGet);
-    Information("Execute git tag: {0}", buildParameters.ShouldExecuteGitTag);
         
     if (DirectoryExists(buildParameters.BuildArtifactsDirectory))
     {
@@ -108,8 +108,6 @@ Task("Restore")
 
 Task("Build")
     .Description("Builds all the different parts of the project.")
-    .IsDependentOn("Clean")
-    .IsDependentOn("Restore")
     .Does(() =>
 {
     if (solutions.Count() == 0)
@@ -158,8 +156,17 @@ Task("Test")
     }
 });
 
+Task("ApplyGitTag")
+    .Description("Apply a git tag.")
+    .WithCriteria(() => buildParameters.ShouldApplyGitTag)
+    .Does(() =>
+{
+    Information($"Applying git tag: {buildParameters.GitTagName}");
+    GitTag("./", buildParameters.GitTagName);
+});
+
 Task("Pack")
-    .IsDependentOn("Test")
+    .Description("Create NuGet packages.")
     .Does(() =>
 {
     var projects = GetFiles("./Src/**/*.csproj");
@@ -185,6 +192,7 @@ Task("Pack")
 });
 
 Task("PublishMyGet")
+    .Description("Publish NuGet packages to MyGet.")
     .WithCriteria(() => buildParameters.ShouldPublishMyGet)
     .IsDependentOn("Pack")
     .Does(() =>
@@ -210,6 +218,7 @@ Task("PublishMyGet")
 });
 
 Task("PublishNuGet")
+    .Description("Publish NuGet packages to NuGet.")
     .WithCriteria(() => buildParameters.ShouldPublishNuGet)
     .IsDependentOn("Pack")
     .Does(() =>
@@ -234,13 +243,13 @@ Task("PublishNuGet")
     }
 });
 
-Task("GitTag")
-    .WithCriteria(() => buildParameters.ShouldExecuteGitTag)
-    .IsDependentOn("PublishNuGet")
+Task("PushGitTag")
+    .Description("Push git tag to remote repository.")
+    .WithCriteria(() => buildParameters.ShouldPushGitTag)
+    .IsDependentOn("ApplyGitTag")
     .Does(() =>
 {
-    Information($"Creating git tag: {buildParameters.GitTagName}");
-    GitTag("./", buildParameters.GitTagName);
+    Information($"Pushing git tag: {buildParameters.GitTagName}");    
     GitPushRef("./", buildParameters.GitHubUsername, buildParameters.GitHubPassword, "origin", buildParameters.GitTagName); 
 });
 
@@ -250,14 +259,15 @@ Task("GitTag")
 
 Task("Default")
     .Description("This is the default task which will be ran if no specific target is passed in.")
-    .IsDependentOn("GitTag")
-    .IsDependentOn("PublishNuGet")
-    .IsDependentOn("PublishMyGet")
-    .IsDependentOn("Pack")
-    .IsDependentOn("Test")
-    .IsDependentOn("Build")
+    .IsDependentOn("Clean")
     .IsDependentOn("Restore")
-    .IsDependentOn("Clean");
+    .IsDependentOn("Build")
+    .IsDependentOn("Test")
+    .IsDependentOn("ApplyGitTag")
+    .IsDependentOn("Pack")
+    .IsDependentOn("PublishMyGet")
+    .IsDependentOn("PublishNuGet")
+    .IsDependentOn("PushGitTag");
 
 ///////////////////////////////////////////////////////////////////////////////
 // EXECUTION
@@ -268,15 +278,13 @@ RunTarget(target);
 public class BuildParameters
 {    
     private ICakeContext _context;
-    private GitVersion _gitVersion;
 
     public BuildParameters(ICakeContext context)
     {
         _context = context;
-        _gitVersion = context.GitVersion();
     }
 
-    public GitVersion GitVersion => _gitVersion;
+    public GitVersion GitVersion => _context.GitVersion();
 
     public bool IsAppVeyorBuild => _context.BuildSystem().AppVeyor.IsRunningOnAppVeyor;
 
@@ -321,9 +329,12 @@ public class BuildParameters
         && (IsMasterBranch || IsHotFixBranch || IsReleaseBranch)
         && !IsPullRequest;
 
-    public bool ShouldExecuteGitTag => ShouldPublishNuGet;
+    public bool ShouldApplyGitTag => !_context.GitTags("./").Any(t => t.FriendlyName == GitTagName);
+    public bool ShouldPushGitTag => !string.IsNullOrWhiteSpace(GitHubUsername) &&
+                                    !string.IsNullOrWhiteSpace(GitHubPassword) &&
+                                    ShouldApplyGitTag;
 
-    public string GitTagName => $"v{GitVersion.SemVer}";
+    public string GitTagName => $"v{GitVersion.LegacySemVerPadded}";
 
     public string BuildArtifactsDirectory => "./BuildArtifacts";
 
