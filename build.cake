@@ -41,6 +41,7 @@ Setup(context =>
     Information("Hotfix branch: {0}", buildParameters.IsHotFixBranch);
     Information("Pull request: {0}", buildParameters.IsPullRequest);
     Information("Apply git tag: {0} | {1}", buildParameters.ShouldApplyGitTag, buildParameters.GitTagName);
+    Information("Push git tag: {0} | {1}", buildParameters.ShouldPushGitTag, buildParameters.GitTagName);
     Information("Publish to myget: {0}", buildParameters.ShouldPublishMyGet);
     Information("Publish to nuget: {0}", buildParameters.ShouldPublishNuGet);
         
@@ -278,10 +279,12 @@ RunTarget(target);
 public class BuildParameters
 {    
     private ICakeContext _context;
+    private bool _shouldApplyGitTag;
 
     public BuildParameters(ICakeContext context)
     {
         _context = context;
+        _shouldApplyGitTag = !context.GitTags("./").Any(t => t.FriendlyName == GitTagName);
     }
 
     public GitVersion GitVersion => _context.GitVersion();
@@ -329,7 +332,8 @@ public class BuildParameters
         && (IsMasterBranch || IsHotFixBranch || IsReleaseBranch)
         && !IsPullRequest;
 
-    public bool ShouldApplyGitTag => !_context.GitTags("./").Any(t => t.FriendlyName == GitTagName);
+    public bool ShouldApplyGitTag => _shouldApplyGitTag;
+
     public bool ShouldPushGitTag => !string.IsNullOrWhiteSpace(GitHubUsername) &&
                                     !string.IsNullOrWhiteSpace(GitHubPassword) &&
                                     ShouldApplyGitTag;
