@@ -7,20 +7,7 @@ using Xer.DomainDriven.Exceptions;
 
 namespace Xer.DomainDriven.Repositories
 {
-    public class InMemoryAggregateRootRepository<TAggregateRoot> : InMemoryAggregateRootRepository<TAggregateRoot, Guid>
-                                                                   where TAggregateRoot : IAggregateRoot<Guid>
-    {
-        public InMemoryAggregateRootRepository()
-        {
-        }
-
-        public InMemoryAggregateRootRepository(bool throwIfAggregateIsNotFound) : base(throwIfAggregateIsNotFound)
-        {
-        }
-    }
-
-    public class InMemoryAggregateRootRepository<TAggregateRoot, TAggregateRootId> : IAggregateRootRepository<TAggregateRoot, TAggregateRootId>, 
-                                                                                     IAggregateRootAsyncRepository<TAggregateRoot, TAggregateRootId> 
+    public class InMemoryAggregateRootRepository<TAggregateRoot, TAggregateRootId> : IAggregateRootRepository<TAggregateRoot, TAggregateRootId> 
                                                                                      where TAggregateRoot : IAggregateRoot<TAggregateRootId>
                                                                                      where TAggregateRootId : IEquatable<TAggregateRootId>
     {
@@ -50,18 +37,19 @@ namespace Xer.DomainDriven.Repositories
 
         #region IAggregateRootRepository Implementation
 
-        public TAggregateRoot GetById(TAggregateRootId aggregateRootId)
+        public Task<TAggregateRoot> GetByIdAsync(TAggregateRootId aggregateRootId, CancellationToken cancellationToken = default(CancellationToken))
         {
             TAggregateRoot aggregateRoot = _aggregateRoots.FirstOrDefault(a => a.Id.Equals(aggregateRootId));
+
             if (aggregateRoot == null && _throwIfAggregateRootIsNotFound)
             {
-                throw new AggregateRootNotFoundException($"Aggregate root with ID {aggregateRootId} was not found.");
+                return TaskFromException<TAggregateRoot>(new AggregateRootNotFoundException($"Aggregate root with ID {aggregateRootId} was not found."));
             }
 
-            return aggregateRoot;
+            return Task.FromResult(aggregateRoot);
         }
 
-        public void Save(TAggregateRoot aggregateRoot)
+        public Task SaveAsync(TAggregateRoot aggregateRoot, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (_aggregateRoots.Contains(aggregateRoot))
             {
@@ -69,39 +57,11 @@ namespace Xer.DomainDriven.Repositories
             }
 
             _aggregateRoots.Add(aggregateRoot);
+
+            return CompletedTask;
         }
 
         #endregion IAggregateRootRepository Implementation
-
-        #region IAggregateRootAsyncRepository Implementation
-
-        public Task<TAggregateRoot> GetByIdAsync(TAggregateRootId aggregateRootId, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            try
-            {
-                TAggregateRoot aggregate = GetById(aggregateRootId);
-                return Task.FromResult(aggregate);
-            }
-            catch (AggregateRootNotFoundException aex)
-            {
-                return TaskFromException<TAggregateRoot>(aex);
-            }
-        }
-
-        public Task SaveAsync(TAggregateRoot aggregateRoot, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            try
-            {
-                Save(aggregateRoot);
-                return CompletedTask;
-            }
-            catch (AggregateRootNotFoundException aex)
-            {
-                return TaskFromException<bool>(aex);
-            }
-        }
-
-        #endregion IAggregateRootAsyncRepository Implementation
 
         #region Functions
 

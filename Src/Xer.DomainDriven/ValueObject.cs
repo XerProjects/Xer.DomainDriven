@@ -30,13 +30,7 @@ namespace Xer.DomainDriven
         /// <returns>True, if objects are determined as equal. Otherwise, false.</returns>
         public override bool Equals(object obj)
         {
-            TSelf other = obj as TSelf;
-            if(other == null)
-            {
-                return false;
-            }
-
-            return ValueEquals(other);
+            return Equals(obj as TSelf);
         }
 
         /// <summary>
@@ -46,6 +40,9 @@ namespace Xer.DomainDriven
         /// <returns>True, if objects are determined as equal. Otherwise, false.</returns>
         public bool Equals(TSelf other)
         {
+            if (other == null)
+                return false;
+
             return ValueEquals(other);
         }
         
@@ -57,7 +54,7 @@ namespace Xer.DomainDriven
         /// <returns>True, if value objects are determined as equal. Otherwise, false.</returns>
         public static bool operator ==(ValueObject<TSelf> obj1, ValueObject<TSelf> obj2)
         {
-            if(ReferenceEquals(obj1, null) && ReferenceEquals(obj2, null))
+            if (ReferenceEquals(obj1, null) && ReferenceEquals(obj2, null))
             {
                 return true;
             }
