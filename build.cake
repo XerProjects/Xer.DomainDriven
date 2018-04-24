@@ -43,14 +43,15 @@ Setup(context =>
     Information("Publish to myget: {0}", buildParameters.ShouldPublishMyGet);
     Information("Publish to nuget: {0}", buildParameters.ShouldPublishNuGet);
     Information("Execute git tag: {0}", buildParameters.ShouldExecuteGitTag);
-    Information("///////////////////////////////////////////////////////////////////////////////");
-    
+        
     if (DirectoryExists(buildParameters.BuildArtifactsDirectory))
     {
         // Cleanup build artifacts.
         Information($"Cleaning up {buildParameters.BuildArtifactsDirectory} directory.");
         DeleteDirectory(buildParameters.BuildArtifactsDirectory, new DeleteDirectorySettings { Recursive = true });
-    }    
+    }
+
+    Information("///////////////////////////////////////////////////////////////////////////////");
 });
 
 Teardown(context =>
@@ -320,7 +321,7 @@ public class BuildParameters
         && (IsMasterBranch || IsHotFixBranch || IsReleaseBranch)
         && !IsPullRequest;
 
-    public bool ShouldExecuteGitTag => IsMasterBranch && ShouldPublishNuGet;
+    public bool ShouldExecuteGitTag => ShouldPublishNuGet;
 
     public string GitTagName => $"v{GitVersion.SemVer}";
 
