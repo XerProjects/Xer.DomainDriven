@@ -240,6 +240,7 @@ Task("GitTag")
 {
     Information($"Creating git tag: {buildParameters.GitTagName}");
     GitTag("./", buildParameters.GitTagName);
+    GitPushRef("./", buildParameters.GitHubUsername, buildParameters.GitHubPassword, "origin", buildParameters.GitTagName); 
 });
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -319,7 +320,7 @@ public class BuildParameters
         && (IsMasterBranch || IsHotFixBranch || IsReleaseBranch)
         && !IsPullRequest;
 
-    public bool ShouldExecuteGitTag => ShouldPublishNuGet;
+    public bool ShouldExecuteGitTag => IsMasterBranch && ShouldPublishNuGet;
 
     public string GitTagName => $"v{GitVersion.SemVer}";
 
