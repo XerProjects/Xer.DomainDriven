@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Xer.DomainDriven.Tests.Entities;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace Xer.DomainDriven.Tests
                 TestValueObject valueObject1 = new TestValueObject("Test", 123);
                 TestValueObject valueObject2 = new TestValueObject("Test", 123);
 
-                Assert.True(valueObject1 == valueObject2);
+                (valueObject1 == valueObject2).Should().BeTrue();
             }
 
             [Fact]
@@ -22,7 +23,7 @@ namespace Xer.DomainDriven.Tests
                 TestValueObject valueObject1 = new TestValueObject("Test", 123);
                 TestValueObject valueObject2 = new TestValueObject("Test2", 1234);
 
-                Assert.True(valueObject1 != valueObject2);
+                (valueObject1 == valueObject2).Should().BeFalse();
             }
 
             [Fact]
@@ -31,7 +32,7 @@ namespace Xer.DomainDriven.Tests
                 TestValueObject valueObject1 = new TestValueObject("Test", 123);
                 TestValueObject valueObject2 = null;
 
-                Assert.True(valueObject1 != valueObject2);
+                (valueObject1 == valueObject2).Should().BeFalse();
             }
         }
 
@@ -42,7 +43,10 @@ namespace Xer.DomainDriven.Tests
             {
                 TestValueObject valueObject1 = new TestValueObject("Test", 123);
 
-                Assert.True(valueObject1.GetHashCode() == valueObject1.GetHashCode());
+                int hashCode1 = valueObject1.GetHashCode();
+                int hashCode2 = valueObject1.GetHashCode();
+
+                hashCode1.Should().Be(hashCode2);
             }
 
             [Fact]
@@ -51,7 +55,10 @@ namespace Xer.DomainDriven.Tests
                 TestValueObject valueObject1 = new TestValueObject("Test", 123);
                 TestValueObject valueObject2 = new TestValueObject("Test", 123);
 
-                Assert.True(valueObject1.GetHashCode() == valueObject2.GetHashCode());
+                int hashCode1 = valueObject1.GetHashCode();
+                int hashCode2 = valueObject2.GetHashCode();
+
+                hashCode1.Should().Be(hashCode2);
             }
 
             [Fact]
@@ -60,7 +67,10 @@ namespace Xer.DomainDriven.Tests
                 TestValueObject valueObject1 = new TestValueObject("Test", 123);
                 TestValueObject valueObject2 = new TestValueObject("Test2", 1234);
 
-                Assert.True(valueObject1.GetHashCode() != valueObject2.GetHashCode());
+                int hashCode1 = valueObject1.GetHashCode();
+                int hashCode2 = valueObject2.GetHashCode();
+
+                hashCode1.Should().NotBe(hashCode2);
             }
         }
     }
