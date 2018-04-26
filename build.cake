@@ -209,7 +209,7 @@ Task("PublishMyGet")
 });
 
 Task("PublishNuGet")
-    .WithCriteria(() => buildParameters.ShouldPublishNuGet)
+    .WithCriteria(() => buildParameters.ShouldPublishNuGet && !string.IsNullOrWhiteSpace("APPVEYOR_REPO_TAG_NAME"))
     .IsDependentOn("Pack")
     .Does(() =>
 {
