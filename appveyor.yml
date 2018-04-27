@@ -11,7 +11,7 @@ artifacts:
 - path: .\BuildArtifacts\*.nupkg
   name: NuGet
 skip_commits:
-  message: ^\[nobuild\](.*)?  # Skip build if commit message starts with [nobuild]
+  message: /^\[nobuild\](.*)?/  # Skip build if commit message starts with [nobuild]
 deploy:
 - provider: NuGet
   server: https://www.myget.org/F/xerprojects-ci/api/v2/package
@@ -19,7 +19,7 @@ deploy:
     secure: u04sQwcw2Dg6ymwifBf1PoYRwo6HrQOsEagB7IQYvwRPt+10tyFcrbuKq7Az34Oz
   skip_symbols: true
   on:
-    branch: (^dev$|^master$|^release[-/](.*)|^hotfix[-/](.*)) # Branches: dev, master, release-*, release/*, hotfix-*, hotfix/*
+    branch: /(^dev$|^master$|^release[-/](.*)|^hotfix[-/](.*))/ # Branches: dev, master, release-*, release/*, hotfix-*, hotfix/*
 - provider: NuGet
   name: production
   skip_symbols: true
