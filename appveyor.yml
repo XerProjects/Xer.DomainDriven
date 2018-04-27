@@ -11,7 +11,7 @@ artifacts:
 - path: .\BuildArtifacts\*.nupkg
   name: NuGet
 skip_commits:
-- message: ^\[nobuild\](.*)?  # Skip build if commit message starts with [nobuild]
+  message: ^\[nobuild\](.*)?  # Skip build if commit message starts with [nobuild]
 deploy:
 - provider: NuGet
   server: https://www.myget.org/F/xerprojects-ci/api/v2/package
