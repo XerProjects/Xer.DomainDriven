@@ -2,6 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.0</TargetFramework>
+    <Authors>jeyjeyemem;xerprojects-contributors;</Authors>
+    <Description>Domain driven design components and marker interfaces.</Description>
+    <Copyright>Copyright (c) XerProjects contributors</Copyright>
+    <PackageLicenseUrl>https://github.com/XerProjects/Xer.DomainDriven/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/XerProjects/Xer.DomainDriven</PackageProjectUrl>
+    <PackageTags>domain-driven-design;ddd;</PackageTags>
   </PropertyGroup>
 
 </Project>
