@@ -26,33 +26,22 @@ BuildParameters buildParameters;
 Setup(context =>
 {
     buildParameters = new BuildParameters(Context);
-        
+    
     // Executed BEFORE the first task.
     Information("Xer.DomainDriven");
-    Information("Parameters");
-    Information("///////////////////////////////////////////////////////////////////////////////");
-    Information("Branch: {0}", buildParameters.BranchName);
-    Information("Version semver: {0}", buildParameters.GitVersion.LegacySemVerPadded);
-    Information("Version assembly: {0}", buildParameters.GitVersion.AssemblySemVer);
-    Information("Version informational: {0}", buildParameters.GitVersion.InformationalVersion);
-    Information("Master branch: {0}", buildParameters.IsMasterBranch);
-    Information("Release branch: {0}", buildParameters.IsReleaseBranch);
-    Information("Dev branch: {0}", buildParameters.IsDevBranch);
-    Information("Hotfix branch: {0}", buildParameters.IsHotFixBranch);
-    Information("Pull request: {0}", buildParameters.IsPullRequest);
-    Information("Apply git tag: {0} | {1}", buildParameters.ShouldApplyGitTag, buildParameters.GitTagName);
-    Information("Push git tag: {0} | {1}", buildParameters.ShouldPushGitTag, buildParameters.GitTagName);
-    Information("Publish to myget: {0}", buildParameters.ShouldPublishMyGet);
-    Information("Publish to nuget: {0}", buildParameters.ShouldPublishNuGet);
-        
+    Information("===========================================================================================");
+    Information("Git Version");
+    Information("Semver: {0}", buildParameters.GitVersion.LegacySemVerPadded);
+    Information("Major minor patch: {0}", buildParameters.GitVersion.MajorMinorPatch);
+    Information("Assembly: {0}", buildParameters.GitVersion.AssemblySemVer);
+    Information("Informational: {0}", buildParameters.GitVersion.InformationalVersion);
     if (DirectoryExists(buildParameters.BuildArtifactsDirectory))
     {
         // Cleanup build artifacts.
         Information($"Cleaning up {buildParameters.BuildArtifactsDirectory} directory.");
         DeleteDirectory(buildParameters.BuildArtifactsDirectory, new DeleteDirectorySettings { Recursive = true });
-    }
-
-    Information("///////////////////////////////////////////////////////////////////////////////");
+    }    
+    Information("===========================================================================================");
 });
 
 Teardown(context =>
@@ -109,6 +98,8 @@ Task("Restore")
 
 Task("Build")
     .Description("Builds all the different parts of the project.")
+    .IsDependentOn("Clean")
+    .IsDependentOn("Restore")
     .Does(() =>
 {
     if (solutions.Count() == 0)
@@ -157,17 +148,9 @@ Task("Test")
     }
 });
 
-Task("ApplyGitTag")
-    .Description("Apply a git tag.")
-    .WithCriteria(() => buildParameters.ShouldApplyGitTag)
-    .Does(() =>
-{
-    Information($"Applying git tag: {buildParameters.GitTagName}");
-    GitTag("./", buildParameters.GitTagName);
-});
-
 Task("Pack")
     .Description("Create NuGet packages.")
+    .IsDependentOn("Test")
     .Does(() =>
 {
     var projects = GetFiles("./Src/**/*.csproj");
@@ -192,83 +175,17 @@ Task("Pack")
     }
 });
 
-Task("PublishMyGet")
-    .Description("Publish NuGet packages to MyGet.")
-    .WithCriteria(() => buildParameters.ShouldPublishMyGet)
-    .IsDependentOn("Pack")
-    .Does(() =>
-{
-    // Nupkgs in BuildArtifacts folder.
-    var nupkgs = GetFiles(buildParameters.BuildArtifactsDirectory + "/*.nupkg");
-    
-    if (nupkgs.Count() == 0)
-    {
-        Information("No nupkgs found.");
-        return;
-    }
-
-    foreach (var nupkgFile in nupkgs)
-    {
-        Information("Pulishing to myget {0}", nupkgFile);
-        NuGetPush(nupkgFile, new NuGetPushSettings 
-        {
-            Source = buildParameters.MyGetFeed,
-            ApiKey = buildParameters.MyGetApiKey
-        });
-    }
-});
-
-Task("PublishNuGet")
-    .Description("Publish NuGet packages to NuGet.")
-    .WithCriteria(() => buildParameters.ShouldPublishNuGet)
-    .IsDependentOn("Pack")
-    .Does(() =>
-{
-    // Nupkgs in BuildArtifacts folder.
-    var nupkgs = GetFiles(buildParameters.BuildArtifactsDirectory + "/*.nupkg");
-
-    if (nupkgs.Count() == 0)
-    {
-        Information("No nupkgs found.");
-        return;
-    }
-
-    foreach (var nupkgFile in nupkgs)
-    {
-        Information("Pulishing to nuget {0}", nupkgFile);
-        NuGetPush(nupkgFile, new NuGetPushSettings 
-        {
-            Source = buildParameters.NuGetFeed,
-            ApiKey = buildParameters.NuGetApiKey
-        });
-    }
-});
-
-Task("PushGitTag")
-    .Description("Push git tag to remote repository.")
-    .WithCriteria(() => buildParameters.ShouldPushGitTag)
-    .IsDependentOn("ApplyGitTag")
-    .Does(() =>
-{
-    Information($"Pushing git tag: {buildParameters.GitTagName}");    
-    GitPushRef("./", buildParameters.GitHubUsername, buildParameters.GitHubPassword, "origin", buildParameters.GitTagName); 
-});
-
 ///////////////////////////////////////////////////////////////////////////////
 // TARGETS
 ///////////////////////////////////////////////////////////////////////////////
 
 Task("Default")
     .Description("This is the default task which will be ran if no specific target is passed in.")
-    .IsDependentOn("Clean")
-    .IsDependentOn("Restore")
-    .IsDependentOn("Build")
-    .IsDependentOn("Test")
-    .IsDependentOn("ApplyGitTag")
     .IsDependentOn("Pack")
-    .IsDependentOn("PublishMyGet")
-    .IsDependentOn("PublishNuGet")
-    .IsDependentOn("PushGitTag");
+    .IsDependentOn("Test")
+    .IsDependentOn("Build")
+    .IsDependentOn("Restore")
+    .IsDependentOn("Clean");
 
 ///////////////////////////////////////////////////////////////////////////////
 // EXECUTION
@@ -279,66 +196,15 @@ RunTarget(target);
 public class BuildParameters
 {    
     private ICakeContext _context;
-    private bool _shouldApplyGitTag;
+    private GitVersion _gitVersion;
 
     public BuildParameters(ICakeContext context)
     {
         _context = context;
-        _shouldApplyGitTag = !context.GitTags("./").Any(t => t.FriendlyName == GitTagName);
+        _gitVersion = context.GitVersion();
     }
 
-    public GitVersion GitVersion => _context.GitVersion();
-
-    public bool IsAppVeyorBuild => _context.BuildSystem().AppVeyor.IsRunningOnAppVeyor;
-
-    public bool IsLocalBuild => _context.BuildSystem().IsLocalBuild;
-
-    public bool IsPullRequest => _context.BuildSystem().AppVeyor.Environment.PullRequest.IsPullRequest;
-
-    public string BranchName
-    {
-        get
-        {
-            return IsLocalBuild 
-                ? _context.GitBranchCurrent(".").FriendlyName
-                : _context.BuildSystem().AppVeyor.Environment.Repository.Branch;
-        }
-    }
-    
-    public string GitHubUsername => _context.EnvironmentVariable("GITHUB_USERNAME");
-
-    public string GitHubPassword => _context.EnvironmentVariable("GITHUB_PASSWORD");
-
-    public string MyGetFeed => _context.EnvironmentVariable("MYGET_SOURCE");
-
-    public string MyGetApiKey => _context.EnvironmentVariable("MYGET_API_KEY");
-
-    public string NuGetFeed => _context.EnvironmentVariable("NUGET_SOURCE");
-
-    public string NuGetApiKey => _context.EnvironmentVariable("NUGET_API_KEY");
-
-    public bool IsMasterBranch => StringComparer.OrdinalIgnoreCase.Equals("master", BranchName);
-
-    public bool IsDevBranch => StringComparer.OrdinalIgnoreCase.Equals("dev", BranchName);
-
-    public bool IsReleaseBranch => BranchName.StartsWith("release", StringComparison.OrdinalIgnoreCase);
-
-    public bool IsHotFixBranch => BranchName.StartsWith("hotfix", StringComparison.OrdinalIgnoreCase);
-
-    public bool ShouldPublishMyGet => !string.IsNullOrWhiteSpace(MyGetApiKey) && !string.IsNullOrWhiteSpace(MyGetFeed);
-
-    public bool ShouldPublishNuGet => !string.IsNullOrWhiteSpace(NuGetApiKey) 
-        && !string.IsNullOrWhiteSpace(NuGetFeed)
-        && (IsMasterBranch || IsHotFixBranch || IsReleaseBranch)
-        && !IsPullRequest;
-
-    public bool ShouldApplyGitTag => _shouldApplyGitTag;
-
-    public bool ShouldPushGitTag => !string.IsNullOrWhiteSpace(GitHubUsername) &&
-                                    !string.IsNullOrWhiteSpace(GitHubPassword) &&
-                                    ShouldApplyGitTag;
-
-    public string GitTagName => $"v{GitVersion.LegacySemVerPadded}";
+    public GitVersion GitVersion => _gitVersion;
 
     public string BuildArtifactsDirectory => "./BuildArtifacts";
 
