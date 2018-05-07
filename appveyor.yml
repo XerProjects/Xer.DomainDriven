@@ -13,7 +13,7 @@ artifacts:
 skip_commits:
   message: /^\[nobuild\](.*)?/  # Skip build if commit message starts with [nobuild]
 deploy:
-- provider: NuGet
+- provider: MyGet
   server: https://www.myget.org/F/xerprojects-ci/api/v2/package
   api_key:
     secure: u04sQwcw2Dg6ymwifBf1PoYRwo6HrQOsEagB7IQYvwRPt+10tyFcrbuKq7Az34Oz
