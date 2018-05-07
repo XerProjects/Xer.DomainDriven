@@ -4,11 +4,11 @@ using Xer.DomainDriven.Exceptions;
 
 namespace Xer.DomainDriven
 {
-    public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot<TId> where TId : IEquatable<TId>
+    public abstract class AggregateRoot : Entity, IAggregateRoot
     {
         #region Declarations
         
-        private readonly Queue<IDomainEvent<TId>> _uncommittedDomainEvents = new Queue<IDomainEvent<TId>>();
+        private readonly Queue<IDomainEvent> _uncommittedDomainEvents = new Queue<IDomainEvent>();
         private readonly DomainEventApplierRegistration _domainEventApplierRegistration = new DomainEventApplierRegistration();
 
         #endregion Declarations
@@ -19,7 +19,7 @@ namespace Xer.DomainDriven
         /// Constructor.
         /// </summary>
         /// <param name="aggregateRootId">Id of aggregate root.</param>
-        public AggregateRoot(TId aggregateRootId)
+        public AggregateRoot(Guid aggregateRootId)
             : base(aggregateRootId)
         {
         }
@@ -30,7 +30,7 @@ namespace Xer.DomainDriven
         /// <param name="aggregateRootId">Id of aggregate root.</param>
         /// <param name="created">Created date.</param>
         /// <param name="updated">Updated date.</param>
-        public AggregateRoot(TId aggregateRootId, DateTime created, DateTime updated)
+        public AggregateRoot(Guid aggregateRootId, DateTime created, DateTime updated)
             : base(aggregateRootId, created, updated)
         {
         }
@@ -45,15 +45,15 @@ namespace Xer.DomainDriven
         /// Get an event stream of all the uncommitted domain events applied to the aggregate.
         /// </summary>
         /// <returns>Stream of uncommitted domain events.</returns>
-        IDomainEventStream<TId> IAggregateRoot<TId>.GetUncommitedDomainEvents()
+        IDomainEventStream IAggregateRoot.GetDomainEventsMarkedForCommit()
         {
-            return new DomainEventStream<TId>(Id, _uncommittedDomainEvents);
+            return new DomainEventStream(Id, _uncommittedDomainEvents);
         }
 
         // <summary>
         // Clear all internally tracked domain events.
         // </summary>
-        void IAggregateRoot<TId>.ClearUncommitedDomainEvents()
+        void IAggregateRoot.MarkDomainEventsAsCommitted()
         {
             _uncommittedDomainEvents.Clear();
         }
@@ -67,17 +67,17 @@ namespace Xer.DomainDriven
         /// </summary>
         /// <typeparam name="TDomainEvent">Domain event to be applied.</typeparam>
         /// <param name="domainEventApplier">Domain event applier.</param>
-        protected void RegisterDomainEventApplier<TDomainEvent>(Action<TDomainEvent> domainEventApplier) where TDomainEvent : class, IDomainEvent<TId>
+        protected void RegisterDomainEventApplier<TDomainEvent>(Action<TDomainEvent> domainEventApplier) where TDomainEvent : class, IDomainEvent
         {
             _domainEventApplierRegistration.RegisterApplierFor<TDomainEvent>(domainEventApplier);
         }
 
         /// <summary>
-        /// Apply domain event to this entity and mark domain event for commit.
+        /// Apply domain event to this aggregate root and mark domain event for commit.
         /// </summary>
         /// <typeparam name="TDomainEvent">Type of domain event to apply.</typeparam>
         /// <param name="domainEvent">Instance of domain event to apply.</param>
-        protected void ApplyDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent<TId>
+        protected void ApplyDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent
         {
             if (domainEvent == null)
             {
@@ -86,6 +86,41 @@ namespace Xer.DomainDriven
 
             // Invoke and track the event to save to event store.
             InvokeDomainEventApplier(domainEvent);
+        }
+
+        /// <summary>
+        /// Apply domain event to this aggregate root wihtout marking domain event for commit.
+        /// </summary>
+        /// <typeparam name="TDomainEvent">Type of domain event to replay.</typeparam>
+        /// <param name="domainEvent">Instance of domain event to replay.</param>
+        protected void ReplayDomainEvent<TDomainEvent>(TDomainEvent domainEvent) where TDomainEvent : IDomainEvent
+        {
+            if (domainEvent == null)
+            {
+                throw new ArgumentNullException(nameof(domainEvent));
+            }
+
+            // Invoke and track the event to save to event store.
+            InvokeDomainEventApplier(domainEvent, markDomainEventForCommit: false);
+        }
+
+        /// <summary>
+        /// Executes when a domain event is successfully applied.
+        /// </summary>
+        /// <param name="domainEvent">Successfully applied domain event.</param>
+        protected virtual void OnDomainEventApplied(IDomainEvent domainEvent)
+        {            
+            // Update timestamp.
+            Updated = domainEvent.TimeStamp;
+        }
+        
+        /// <summary>
+        /// Add domain event to list of tracked domain events.
+        /// </summary>
+        /// <param name="domainEvent">Domain event instance to track.</param>
+        protected virtual void MarkAppliedDomainEventForCommit(IDomainEvent domainEvent)
+        {
+            _uncommittedDomainEvents.Enqueue(domainEvent);
         }
 
         #endregion Protected Methods
@@ -98,22 +133,20 @@ namespace Xer.DomainDriven
         /// <typeparam name="TDomainEvent">Type of the domain event to handle.</typeparam>
         /// <param name="domainEvent">Domain event instance to handle.</param>
         /// <param name="markDomainEventForCommit">True, if domain event should be marked/tracked for commit. Otherwise, false - which means domain event should just be replayed.</param>
-        private void InvokeDomainEventApplier<TDomainEvent>(TDomainEvent domainEvent, bool markDomainEventForCommit = true) where TDomainEvent : IDomainEvent<TId>
+        private void InvokeDomainEventApplier<TDomainEvent>(TDomainEvent domainEvent, bool markDomainEventForCommit = true) where TDomainEvent : IDomainEvent
         {
-            Action<IDomainEvent<TId>> domainEventApplier = _domainEventApplierRegistration.GetApplierFor(domainEvent);
-            if (domainEventApplier == null)
+            if (!_domainEventApplierRegistration.TryGetApplierFor(domainEvent, out Action<IDomainEvent> domainEventApplier))
             {
-                throw new DomainEventNotAppliedException<TId>(domainEvent,
+                throw new DomainEventNotAppliedException(domainEvent,
                     $@"{GetType().Name} has no registered domain event applier to apply domain event of type {domainEvent.GetType().Name}.
-                    Register domain event appliers by calling {nameof(RegisterDomainEventApplier)} method during object construction.");
+                    Register domain event appliers by calling {nameof(RegisterDomainEventApplier)} method in constructor.");
             }
 
             try
             {
                 domainEventApplier.Invoke(domainEvent);
 
-                // Update timestamp.
-                Updated = domainEvent.TimeStamp;
+                OnDomainEventApplied(domainEvent);
                 
                 if (markDomainEventForCommit)
                 {
@@ -122,19 +155,10 @@ namespace Xer.DomainDriven
             }
             catch (Exception ex)
             {
-                throw new DomainEventNotAppliedException<TId>(domainEvent,
+                throw new DomainEventNotAppliedException(domainEvent,
                     $"Exception occured while trying to apply domain event of type {domainEvent.GetType().Name}.",
                     ex);
             }
-        }
-        
-        /// <summary>
-        /// Add domain event to list of tracked domain events.
-        /// </summary>
-        /// <param name="domainEvent">Domain event instance to track.</param>
-        private void MarkAppliedDomainEventForCommit(IDomainEvent<TId> domainEvent)
-        {
-            _uncommittedDomainEvents.Enqueue(domainEvent);
         }
 
         #endregion Functions
@@ -146,14 +170,14 @@ namespace Xer.DomainDriven
         /// </summary>
         private class DomainEventApplierRegistration
         {
-            private readonly IDictionary<Type, Action<IDomainEvent<TId>>> _applierByDomainEventType = new Dictionary<Type, Action<IDomainEvent<TId>>>();
+            private readonly Dictionary<Type, Action<IDomainEvent>> _applierByDomainEventType = new Dictionary<Type, Action<IDomainEvent>>();
 
             /// <summary>
             /// Register action to be executed for the domain event.
             /// </summary>
             /// <typeparam name="TDomainEvent">Type of domain event to apply.</typeparam>
             /// <param name="applier">Action to apply the domain event to the aggregate.</param>
-            public void RegisterApplierFor<TDomainEvent>(Action<TDomainEvent> applier) where TDomainEvent : class, IDomainEvent<TId>
+            public void RegisterApplierFor<TDomainEvent>(Action<TDomainEvent> applier) where TDomainEvent : class, IDomainEvent
             {
                 if (applier == null)
                 {
@@ -167,7 +191,7 @@ namespace Xer.DomainDriven
                     throw new InvalidOperationException($"A domain event applier that applies {domainEventType.Name} has already been registered.");
                 }
                 
-                Action<IDomainEvent<TId>> domainEventApplier = (d) =>
+                Action<IDomainEvent> domainEventApplier = (d) =>
                 {
                     TDomainEvent domainEvent = d as TDomainEvent;
                     if (domainEvent == null)
@@ -187,17 +211,16 @@ namespace Xer.DomainDriven
             /// Get action to execute for the applied domain event.
             /// </summary>
             /// <param name="domainEvent">Domain event to apply.</param>
-            /// <returns>Action that applies the domain event to the aggregate.</returns>
-            public Action<IDomainEvent<TId>> GetApplierFor(IDomainEvent<TId> domainEvent)
+            /// <param name="domainEventApplier">Action that applies the domain event to the aggregate.</param>
+            /// <returns>True, if a registered domain event applier is found. Otherwise, false.</returns>
+            public bool TryGetApplierFor(IDomainEvent domainEvent, out Action<IDomainEvent> domainEventApplier)
             {
                 if (domainEvent == null)
                 {
                     throw new ArgumentNullException(nameof(domainEvent));
                 }
 
-                _applierByDomainEventType.TryGetValue(domainEvent.GetType(), out Action<IDomainEvent<TId>> domainEventAction);
-
-                return domainEventAction;
+                return _applierByDomainEventType.TryGetValue(domainEvent.GetType(), out domainEventApplier);
             }
         }
 

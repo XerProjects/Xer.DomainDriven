@@ -7,9 +7,8 @@ using Xer.DomainDriven.Exceptions;
 
 namespace Xer.DomainDriven.Repositories
 {
-    public class InMemoryAggregateRootRepository<TAggregateRoot, TAggregateRootId> : IAggregateRootRepository<TAggregateRoot, TAggregateRootId> 
-                                                                                     where TAggregateRoot : IAggregateRoot<TAggregateRootId>
-                                                                                     where TAggregateRootId : IEquatable<TAggregateRootId>
+    public class InMemoryAggregateRootRepository<TAggregateRoot> : IAggregateRootRepository<TAggregateRoot> 
+                                                                   where TAggregateRoot : IAggregateRoot
     {
         #region Declarations
 
@@ -22,12 +21,19 @@ namespace Xer.DomainDriven.Repositories
 
         #region Constructors
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public InMemoryAggregateRootRepository()
             : this(false)
         {
 
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="throwIfAggregateRootIsNotFound">True if repository should throw if aggregate root does not exist. Otherwise, false.</param>
         public InMemoryAggregateRootRepository(bool throwIfAggregateRootIsNotFound)
         {
             _throwIfAggregateRootIsNotFound = throwIfAggregateRootIsNotFound;
@@ -37,7 +43,13 @@ namespace Xer.DomainDriven.Repositories
 
         #region IAggregateRootRepository Implementation
 
-        public Task<TAggregateRoot> GetByIdAsync(TAggregateRootId aggregateRootId, CancellationToken cancellationToken = default(CancellationToken))
+        /// <summary>
+        /// Get aggregate root by ID.
+        /// </summary>
+        /// <param name="aggregateRootId">Aggregate root ID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Instance of aggregate root.</returns>
+        public Task<TAggregateRoot> GetByIdAsync(Guid aggregateRootId, CancellationToken cancellationToken = default(CancellationToken))
         {
             TAggregateRoot aggregateRoot = _aggregateRoots.FirstOrDefault(a => a.Id.Equals(aggregateRootId));
 
@@ -49,6 +61,12 @@ namespace Xer.DomainDriven.Repositories
             return Task.FromResult(aggregateRoot);
         }
 
+        /// <summary>
+        /// Save aggregate root.
+        /// </summary>
+        /// <param name="aggregateRoot">Aggregate root.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Asynchronous task.</returns>
         public Task SaveAsync(TAggregateRoot aggregateRoot, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (_aggregateRoots.Contains(aggregateRoot))
@@ -65,6 +83,11 @@ namespace Xer.DomainDriven.Repositories
 
         #region Functions
 
+        /// <summary>
+        /// Create a task with exception.
+        /// </summary>
+        /// <param name="ex">Exception.</param>
+        /// <returns>Faulted task containing the exception.</returns>
         private static Task<TResult> TaskFromException<TResult>(Exception ex)
         {
             TaskCompletionSource<TResult> tcs = new TaskCompletionSource<TResult>();

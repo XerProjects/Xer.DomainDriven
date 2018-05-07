@@ -16,12 +16,12 @@ namespace Xer.DomainDriven.Tests
             {
                 TestAggregateRoot aggregateRoot = new TestAggregateRoot(Guid.NewGuid());
 
-                var stream = new DomainEventStream<Guid>(aggregateRoot.Id);
+                var stream = new DomainEventStream(aggregateRoot.Id);
 
                 stream.Should().HaveCount(0);
 
                 var aggregateRootDomainEvent = new AggregateRootChangedDomainEvent(aggregateRoot.Id, Guid.NewGuid());
-                IDomainEventStream<Guid> result = stream.AppendDomainEvent(aggregateRootDomainEvent);
+                IDomainEventStream result = stream.AppendDomainEvent(aggregateRootDomainEvent);
 
                 result.Should().HaveCount(1);
             }
@@ -32,7 +32,7 @@ namespace Xer.DomainDriven.Tests
                 TestAggregateRoot aggregateRoot1 = new TestAggregateRoot(Guid.NewGuid());
                 TestAggregateRoot aggregateRoot2 = new TestAggregateRoot(Guid.NewGuid());
 
-                var aggregateRoot1Stream = new DomainEventStream<Guid>(aggregateRoot1.Id);
+                var aggregateRoot1Stream = new DomainEventStream(aggregateRoot1.Id);
 
                 aggregateRoot1Stream.Should().HaveCount(0);
 
@@ -45,7 +45,7 @@ namespace Xer.DomainDriven.Tests
             [Fact]
             public void ShouldThrowIfStreamToAppendIsNull()
             {
-                DomainEventStream<Guid> stream = new DomainEventStream<Guid>(Guid.NewGuid());
+                DomainEventStream stream = new DomainEventStream(Guid.NewGuid());
                 stream.Invoking(s => s.AppendDomainEvent(null)).Should().Throw<ArgumentNullException>();
             }
         }
@@ -60,27 +60,27 @@ namespace Xer.DomainDriven.Tests
             public void ShouldAppendDomainEventsToEndOfStream()
             {
                 TestAggregateRoot aggregateRoot = new TestAggregateRoot(Guid.NewGuid());
-                IAggregateRoot<Guid> explicitCast = aggregateRoot;
+                IAggregateRoot explicitCast = aggregateRoot;
 
                 // Apply 3 domain events.
                 aggregateRoot.ChangeMe(Guid.NewGuid());
                 aggregateRoot.ChangeMe(Guid.NewGuid());
                 aggregateRoot.ChangeMe(Guid.NewGuid());
 
-                DomainEventStream<Guid> stream1 = (DomainEventStream<Guid>)explicitCast.GetUncommitedDomainEvents();
+                DomainEventStream stream1 = (DomainEventStream)explicitCast.GetDomainEventsMarkedForCommit();
 
                 // Clear domain events.
-                explicitCast.ClearUncommitedDomainEvents();
+                explicitCast.MarkDomainEventsAsCommitted();
 
                 // Apply 3 domain events.
                 aggregateRoot.ChangeMe(Guid.NewGuid());
                 aggregateRoot.ChangeMe(Guid.NewGuid());
                 aggregateRoot.ChangeMe(Guid.NewGuid());
 
-                DomainEventStream<Guid> stream2 = (DomainEventStream<Guid>)explicitCast.GetUncommitedDomainEvents();
+                DomainEventStream stream2 = (DomainEventStream)explicitCast.GetDomainEventsMarkedForCommit();
                 
                 // Append 2 streams.
-                DomainEventStream<Guid> result = stream1.AppendDomainEventStream(stream2);
+                DomainEventStream result = stream1.AppendDomainEventStream(stream2);
 
                 result.Should().HaveCount(6);
             }
@@ -90,22 +90,22 @@ namespace Xer.DomainDriven.Tests
             {
                 TestAggregateRoot aggregateRoot1 = new TestAggregateRoot(Guid.NewGuid());
                 TestAggregateRoot aggregateRoot2 = new TestAggregateRoot(Guid.NewGuid());
-                IAggregateRoot<Guid> aggregateRoot1ExplicitCast = aggregateRoot1;
-                IAggregateRoot<Guid> aggregateRoot2ExplicitCast = aggregateRoot2;
+                IAggregateRoot aggregateRoot1ExplicitCast = aggregateRoot1;
+                IAggregateRoot aggregateRoot2ExplicitCast = aggregateRoot2;
 
                 // Apply 3 domain events.
                 aggregateRoot1.ChangeMe(Guid.NewGuid());
                 aggregateRoot1.ChangeMe(Guid.NewGuid());
                 aggregateRoot1.ChangeMe(Guid.NewGuid());
 
-                DomainEventStream<Guid> stream1 = (DomainEventStream<Guid>)aggregateRoot1ExplicitCast.GetUncommitedDomainEvents();
+                DomainEventStream stream1 = (DomainEventStream)aggregateRoot1ExplicitCast.GetDomainEventsMarkedForCommit();
 
                 // Apply 3 domain events.
                 aggregateRoot2.ChangeMe(Guid.NewGuid());
                 aggregateRoot2.ChangeMe(Guid.NewGuid());
                 aggregateRoot2.ChangeMe(Guid.NewGuid());
 
-                DomainEventStream<Guid> stream2 = (DomainEventStream<Guid>)aggregateRoot2ExplicitCast.GetUncommitedDomainEvents();
+                DomainEventStream stream2 = (DomainEventStream)aggregateRoot2ExplicitCast.GetDomainEventsMarkedForCommit();
                 
                 // Append 2 streams.
                 stream1.Invoking(s1 => s1.AppendDomainEventStream(stream2)).Should().Throw<InvalidOperationException>();
@@ -114,7 +114,7 @@ namespace Xer.DomainDriven.Tests
             [Fact]
             public void ShouldThrowIfStreamToAppendIsNull()
             {
-                DomainEventStream<Guid> stream = new DomainEventStream<Guid>(Guid.NewGuid());
+                DomainEventStream stream = new DomainEventStream(Guid.NewGuid());
                 stream.Invoking(s => s.AppendDomainEventStream(null)).Should().Throw<ArgumentNullException>();
             }
         }
@@ -135,7 +135,7 @@ namespace Xer.DomainDriven.Tests
                 var domainEvent2 = new AggregateRootChangedDomainEvent(aggregateRoot.Id, Guid.NewGuid());
                 var domainEvent3 = new AggregateRootChangedDomainEvent(aggregateRoot.Id, Guid.NewGuid());
 
-                DomainEventStream<Guid> stream = new DomainEventStream<Guid>(aggregateRoot.Id, new[]
+                DomainEventStream stream = new DomainEventStream(aggregateRoot.Id, new[]
                 {
                     domainEvent1, domainEvent2, domainEvent3
                 });

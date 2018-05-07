@@ -2,7 +2,7 @@ using System;
 
 namespace Xer.DomainDriven.Tests.Entities
 {
-    public class AggregateRootChangedDomainEvent : IDomainEvent<Guid>
+    public class AggregateRootChangedDomainEvent : IDomainEvent
     {
         public Guid ChangeId { get; }
 
@@ -17,7 +17,7 @@ namespace Xer.DomainDriven.Tests.Entities
         }
     }
 
-    public class ExceptionCausingDomainEvent : IDomainEvent<Guid>
+    public class ExceptionCausingDomainEvent : IDomainEvent
     {
         public Guid AggregateRootId { get; }
 

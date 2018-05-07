@@ -2,17 +2,17 @@ using System;
 
 namespace Xer.DomainDriven
 {
-    public interface IAggregateRoot<TId> : IEntity<TId> where TId : IEquatable<TId>
+    public interface IAggregateRoot : IEntity
     {
         /// <summary>
         /// Get an event stream of all the uncommitted domain events applied to the aggregate root.
         /// </summary>
         /// <returns>Stream of uncommitted domain events.</returns>
-        IDomainEventStream<TId> GetUncommitedDomainEvents();
+        IDomainEventStream GetDomainEventsMarkedForCommit();
 
         // <summary>
-        // Clear all internally tracked domain events.
+        // Mark all internally tracked domain events as committed.
         // </summary>
-        void ClearUncommitedDomainEvents();
+        void MarkDomainEventsAsCommitted();
     }
 }
