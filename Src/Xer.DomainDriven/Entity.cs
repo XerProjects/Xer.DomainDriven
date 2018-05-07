@@ -2,12 +2,12 @@
 
 namespace Xer.DomainDriven
 {
-    public abstract class Entity<TId> : IEntity<TId> where TId : IEquatable<TId>
+    public abstract class Entity : IEntity
     {
         /// <summary>
         /// Unique ID.
         /// </summary>
-        public TId Id { get; protected set; }
+        public Guid Id { get; protected set; }
 
         /// <summary>
         /// Date when entitity was created.
@@ -26,7 +26,7 @@ namespace Xer.DomainDriven
         /// This will set <see cref="Entity.Created"/> and <see cref="Entity.Updated"/> properties to <see cref="DateTime.UtcNow"/>.
         /// </remarks>
         /// <param name="entityId">ID of entity.</param>
-        public Entity(TId entityId)
+        public Entity(Guid entityId)
         {
             Id = entityId;
             Created = DateTime.UtcNow;
@@ -39,7 +39,7 @@ namespace Xer.DomainDriven
         /// <param name="entityId">ID of entity.</param>
         /// <param name="created">Created date.</param>
         /// <param name="updated">Updated date.</param>
-        public Entity(TId entityId, DateTime created, DateTime updated)
+        public Entity(Guid entityId, DateTime created, DateTime updated)
         {
             Id = entityId;
             Created = created;

@@ -5,13 +5,11 @@ using System.Linq;
 
 namespace Xer.DomainDriven
 {
-    public class DomainEventStream<TAggregateRootId> : IDomainEventStream<TAggregateRootId>, 
-                                                       IEnumerable<IDomainEvent<TAggregateRootId>> 
-                                                       where TAggregateRootId : IEquatable<TAggregateRootId>
+    public class DomainEventStream : IDomainEventStream, IEnumerable<IDomainEvent>
     {
         #region Declarations
         
-        private readonly ICollection<IDomainEvent<TAggregateRootId>> _domainEvents;
+        private readonly List<IDomainEvent> _domainEvents;
 
         #endregion Declarations
 
@@ -20,7 +18,7 @@ namespace Xer.DomainDriven
         /// <summary>
         /// Id of the aggregate root which owns this stream.
         /// </summary>
-        public TAggregateRootId AggregateRootId { get; }
+        public Guid AggregateRootId { get; }
 
         /// <summary>
         /// Get number of domain events in the stream.
@@ -35,10 +33,10 @@ namespace Xer.DomainDriven
         /// Constructor to create an empty stream for the aggregate.
         /// </summary>
         /// <param name="aggreggateRootId">ID of the aggregate root.</param>
-        public DomainEventStream(TAggregateRootId aggreggateRootId)
+        public DomainEventStream(Guid aggreggateRootId)
         {
             AggregateRootId = aggreggateRootId;
-            _domainEvents = new List<IDomainEvent<TAggregateRootId>>();
+            _domainEvents = new List<IDomainEvent>();
         }
 
         /// <summary>
@@ -46,7 +44,7 @@ namespace Xer.DomainDriven
         /// </summary>
         /// <param name="aggregateRootId">Id of the aggregate root which owns this stream.</param>
         /// <param name="domainEvents">Domain events.</param>
-        public DomainEventStream(TAggregateRootId aggregateRootId, IEnumerable<IDomainEvent<TAggregateRootId>> domainEvents)
+        public DomainEventStream(Guid aggregateRootId, IEnumerable<IDomainEvent> domainEvents)
         {
             if (domainEvents == null)
             {
@@ -66,7 +64,7 @@ namespace Xer.DomainDriven
         /// </summary>
         /// <param name="domainEventToAppend">Domain event to append to the domain event stream.</param>
         /// <returns>New instance of domain event stream with the appended domain event.</returns>
-        public DomainEventStream<TAggregateRootId> AppendDomainEvent(IDomainEvent<TAggregateRootId> domainEventToAppend)
+        public DomainEventStream AppendDomainEvent(IDomainEvent domainEventToAppend)
         {
             if (domainEventToAppend == null)
             {
@@ -78,7 +76,7 @@ namespace Xer.DomainDriven
                 throw new InvalidOperationException("Cannot append domain event belonging to a different aggregate root.");
             }
 
-            return AppendDomainEventStream(new DomainEventStream<TAggregateRootId>(AggregateRootId, new[] { domainEventToAppend }));
+            return new DomainEventStream(AggregateRootId, this.Concat(new[] { domainEventToAppend }));
         }
 
         /// <summary>
@@ -86,9 +84,9 @@ namespace Xer.DomainDriven
         /// </summary>
         /// <param name="streamToAppend">Domain event stream to append to this domain event stream.</param>
         /// <returns>New instance of domain event stream with the appended domain event stream.</returns>
-        public DomainEventStream<TAggregateRootId> AppendDomainEventStream(IDomainEventStream<TAggregateRootId> streamToAppend)
+        public DomainEventStream AppendDomainEventStream(IDomainEventStream streamToAppend)
         {
-            if(streamToAppend == null)
+            if (streamToAppend == null)
             {
                 throw new ArgumentNullException(nameof(streamToAppend));
             }
@@ -98,16 +96,16 @@ namespace Xer.DomainDriven
                 throw new InvalidOperationException("Cannot append domain events belonging to a different aggregate root.");
             }
             
-            return new DomainEventStream<TAggregateRootId>(AggregateRootId, this.Concat(streamToAppend));
+            return new DomainEventStream(AggregateRootId, this.Concat(streamToAppend));
         }
 
         /// <summary>
         /// Get enumerator.
         /// </summary>
         /// <returns>Enumerator which yields domain events until iterated upon.</returns>
-        public IEnumerator<IDomainEvent<TAggregateRootId>> GetEnumerator()
+        public IEnumerator<IDomainEvent> GetEnumerator()
         {
-            foreach(IDomainEvent<TAggregateRootId> domainEvent in _domainEvents)
+            foreach (IDomainEvent domainEvent in _domainEvents)
             {
                 yield return domainEvent;
             }
@@ -119,7 +117,7 @@ namespace Xer.DomainDriven
         /// <returns>Enumerator which yields domain events until iterated upon.</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            foreach (IDomainEvent<TAggregateRootId> domainEvent in _domainEvents)
+            foreach (IDomainEvent domainEvent in _domainEvents)
             {
                 yield return domainEvent;
             }

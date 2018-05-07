@@ -2,12 +2,12 @@ using System;
 
 namespace Xer.DomainDriven
 {
-    public interface IEntity<TId> where TId : IEquatable<TId>
+    public interface IEntity
     {
         /// <summary>
         /// Unique identifier.
         /// </summary>
-        TId Id { get; }
+        Guid Id { get; }
 
         /// <summary>
         /// Date when entity was created.

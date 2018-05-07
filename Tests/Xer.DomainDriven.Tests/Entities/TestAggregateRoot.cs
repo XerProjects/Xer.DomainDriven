@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Xer.DomainDriven.Tests.Entities
 {
-    public class TestAggregateRoot : AggregateRoot<Guid>
+    public class TestAggregateRoot : AggregateRoot
     {
         private readonly List<Guid> _handledChangeIDs = new List<Guid>();
 
@@ -49,7 +49,7 @@ namespace Xer.DomainDriven.Tests.Entities
         }
     }
 
-    public class NoApplierAggregateRoot : AggregateRoot<Guid>
+    public class NoApplierAggregateRoot : AggregateRoot
     {
         public NoApplierAggregateRoot(Guid aggregateRootId) 
             : base(aggregateRootId)

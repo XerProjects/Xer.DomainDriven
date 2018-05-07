@@ -4,31 +4,52 @@ using System.Threading.Tasks;
 
 namespace Xer.DomainDriven.Repositories
 {
-    public class PublishingRepository<TAggregateRoot, TAggregateRootId> : IAggregateRootRepository<TAggregateRoot, TAggregateRootId>
-        where TAggregateRoot : IAggregateRoot<TAggregateRootId>
-        where TAggregateRootId : IEquatable<TAggregateRootId>
+    public class PublishingRepository<TAggregateRoot> : IAggregateRootRepository<TAggregateRoot>
+                                                        where TAggregateRoot : IAggregateRoot
     {
-        private readonly IAggregateRootRepository<TAggregateRoot, TAggregateRootId> _aggregateRootRepository;
+        private readonly IAggregateRootRepository<TAggregateRoot> _inner;
         private readonly IDomainEventPublisher _domainEventPublisher;
 
-        public PublishingRepository(IAggregateRootRepository<TAggregateRoot, TAggregateRootId> aggregateRootRepository, 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="inner">Aggregate root repository to decorate.</param>
+        /// <param name="domainEventPublisher">Domain event publisher.</param>
+        public PublishingRepository(IAggregateRootRepository<TAggregateRoot> inner, 
                                     IDomainEventPublisher domainEventPublisher)
         {
-            _aggregateRootRepository = aggregateRootRepository;
+            _inner = inner;
             _domainEventPublisher = domainEventPublisher;
         }
 
-        public Task<TAggregateRoot> GetByIdAsync(TAggregateRootId aggregateRootId, CancellationToken cancellationToken = default(CancellationToken))
-            => _aggregateRootRepository.GetByIdAsync(aggregateRootId, cancellationToken);
+        /// <summary>
+        /// Get aggregate root by ID.
+        /// </summary>
+        /// <param name="aggregateRootId">Aggregate root ID.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Instance of aggregate root.</returns>
+        public Task<TAggregateRoot> GetByIdAsync(Guid aggregateRootId, CancellationToken cancellationToken = default(CancellationToken))
+            => _inner.GetByIdAsync(aggregateRootId, cancellationToken);
 
+        /// <summary>
+        /// Save aggregate root and publish uncommitted domain events.
+        /// </summary>
+        /// <param name="aggregateRoot">Aggregate root.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Asynchronous task.</returns>
         public async Task SaveAsync(TAggregateRoot aggregateRoot, CancellationToken cancellationToken = default(CancellationToken))
         {
-            IDomainEventStream<TAggregateRootId> streamCopy = aggregateRoot.GetUncommitedDomainEvents();
+            // Get a copy of domain events marked for commit.
+            IDomainEventStream domainEventsCopy = aggregateRoot.GetDomainEventsMarkedForCommit();
 
-            await _aggregateRootRepository.SaveAsync(aggregateRoot);
+            // Save aggregate root.
+            await _inner.SaveAsync(aggregateRoot);
 
             // Publish after saving.
-            await _domainEventPublisher.PublishAsync(streamCopy);
+            await _domainEventPublisher.PublishAsync(domainEventsCopy);
+
+            // Clear domain events after publishing.
+            aggregateRoot.MarkDomainEventsAsCommitted();
         }
     }
 }
