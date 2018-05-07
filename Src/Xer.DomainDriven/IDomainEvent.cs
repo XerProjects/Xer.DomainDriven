@@ -2,12 +2,12 @@ using System;
 
 namespace Xer.DomainDriven
 {
-    public interface IDomainEvent<TAggregateRootId> where TAggregateRootId : IEquatable<TAggregateRootId>
+    public interface IDomainEvent
     {
         /// <summary>
         /// Id of the aggregate root.
         /// </summary>
-        TAggregateRootId AggregateRootId { get; }
+        Guid AggregateRootId { get; }
 
         /// <summary>
         /// Timestamp.

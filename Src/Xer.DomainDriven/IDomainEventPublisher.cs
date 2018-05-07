@@ -7,8 +7,12 @@ namespace Xer.DomainDriven
 {
     public interface IDomainEventPublisher
     {
-        Task PublishAsync<TAggregateRootId>(IDomainEventStream<TAggregateRootId> domainEvents, 
-                                            CancellationToken cancellationToken = default(CancellationToken))
-                                            where TAggregateRootId : IEquatable<TAggregateRootId>;
+        /// <summary>
+        /// Publish domain events.
+        /// </summary>
+        /// <param name="domainEvents">Domain events.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Asynchronous task.</returns>
+        Task PublishAsync(IDomainEventStream domainEvents, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

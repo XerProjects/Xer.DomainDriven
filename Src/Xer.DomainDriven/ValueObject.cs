@@ -96,7 +96,7 @@ namespace Xer.DomainDriven
         /// </summary>
         protected struct HashCode
         {
-            private readonly int _value;
+            private int _value;
             
             /// <summary>
             /// Constructor.
@@ -126,7 +126,7 @@ namespace Xer.DomainDriven
             }
 
             /// <summary>
-            /// Implicit convenrsion from HashCode to int.
+            /// Implicit conversion from HashCode to int.
             /// </summary>
             /// <param name="hashCode">HashCode.</param>
             public static implicit operator int(HashCode hashCode)

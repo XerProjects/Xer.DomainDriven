@@ -36,7 +36,7 @@ namespace Xer.DomainDriven.Tests
             {
                 var aggregateRoot = new NoApplierAggregateRoot(Guid.NewGuid());
                 aggregateRoot.Invoking(ar => ar.ChangeMe(Guid.NewGuid()))
-                             .Should().ThrowExactly<DomainEventNotAppliedException<Guid>>();
+                             .Should().ThrowExactly<DomainEventNotAppliedException>();
             }
         }
 
@@ -56,8 +56,8 @@ namespace Xer.DomainDriven.Tests
                 aggregateRoot.ChangeMe(Guid.NewGuid());
                 aggregateRoot.ChangeMe(Guid.NewGuid());
 
-                IAggregateRoot<Guid> explicitCast = aggregateRoot;
-                explicitCast.GetUncommitedDomainEvents().Should().HaveCount(3);
+                IAggregateRoot explicitCast = aggregateRoot;
+                explicitCast.GetDomainEventsMarkedForCommit().Should().HaveCount(3);
             }
         }
 
@@ -78,12 +78,12 @@ namespace Xer.DomainDriven.Tests
                 aggregateRoot.ChangeMe(Guid.NewGuid());
 
                 // Check
-                IAggregateRoot<Guid> explicitCast = aggregateRoot;
-                explicitCast.GetUncommitedDomainEvents().Should().HaveCount(3);
+                IAggregateRoot explicitCast = aggregateRoot;
+                explicitCast.GetDomainEventsMarkedForCommit().Should().HaveCount(3);
 
                 // Clear
-                explicitCast.ClearUncommitedDomainEvents();
-                explicitCast.GetUncommitedDomainEvents().Should().HaveCount(0);
+                explicitCast.MarkDomainEventsAsCommitted();
+                explicitCast.GetDomainEventsMarkedForCommit().Should().HaveCount(0);
             }
         }
 
