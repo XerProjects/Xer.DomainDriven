@@ -22,4 +22,12 @@ namespace Xer.DomainDriven.Tests.Entities
             return HashCode.From(Number, Data);
         }
     }
+
+    public class TestValueObjectSecond : TestValueObject
+    {
+        public TestValueObjectSecond(string data, int number) 
+            : base(data, number)
+        {
+        }
+    }
 }

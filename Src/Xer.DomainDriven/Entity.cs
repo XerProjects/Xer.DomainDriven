@@ -2,7 +2,7 @@
 
 namespace Xer.DomainDriven
 {
-    public abstract class Entity : IEntity
+    public abstract class Entity : IEntity, IEquatable<IEntity>
     {
         /// <summary>
         /// Unique ID.
@@ -44,6 +44,74 @@ namespace Xer.DomainDriven
             Id = entityId;
             Created = created;
             Updated = updated;
+        }
+
+        /// <summary>
+        /// Determine if object is equal by identity.
+        /// </summary>
+        /// <param name="other">Other object.</param>
+        /// <returns>True, if entities are equal by identity. Otherwise, false.</returns>
+        public override bool Equals(object other)
+        {
+            return Equals(other as IEntity);
+        }
+
+        /// <summary>
+        /// Determine if entity is equal by identity.
+        /// </summary>
+        /// <param name="other">Other entity.</param>
+        /// <returns>True, if entities are equal by identity. Otherwise, false.</returns>
+        public virtual bool Equals(IEntity other)
+        {
+            if (ReferenceEquals(other, null))
+                return false;
+
+            if (ReferenceEquals(this, other))
+                return true;
+
+            if (this.GetType() != other.GetType())
+                return false;
+
+            return Id == other.Id; 
+        }
+
+        /// <summary>
+        /// Equality operator.
+        /// </summary>
+        /// <param name="entity1">First entity.</param>
+        /// <param name="entity2">Second entity.</param>
+        /// <returns>True, if entities are equal by identity. Otherwise, false.</returns>
+        public static bool operator ==(Entity e1, Entity e2)
+        {
+            if (ReferenceEquals(e1, null) && ReferenceEquals(e2, null))
+                return true;
+
+            if (!ReferenceEquals(e1, null))
+            {
+                return e1.Equals(e2);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Inequality operator.
+        /// </summary>
+        /// <param name="entity1">First entity.</param>
+        /// <param name="entity2">Second entity.</param>
+        /// <returns>True, if entities are not equal by identity. Otherwise, false.</returns>
+        public static bool operator !=(Entity entity1, Entity entity2)
+        {
+            return !(entity1 == entity2);
+        }
+
+        /// <summary>
+        /// Generate hash code from ID.
+        /// </summary>
+        /// <returns>Hash code generated from ID.</returns>
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
         }
     }
 }
