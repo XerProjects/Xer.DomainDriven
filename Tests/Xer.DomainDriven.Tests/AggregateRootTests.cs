@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using FluentAssertions;
 using Xer.DomainDriven.Exceptions;
 using Xer.DomainDriven.Tests.Entities;
@@ -44,7 +45,7 @@ namespace Xer.DomainDriven.Tests
 
         #region GetUncommittedDomainEventsMethod
 
-        public class GetUncommittedDomainEventsMethod
+        public class GetDomainEventsMarkedForCommitMethod
         {
             [Fact]
             public void ShouldIncludeAppliedDomainEvent()
@@ -61,9 +62,9 @@ namespace Xer.DomainDriven.Tests
             }
         }
 
-        #endregion GetUncommittedDomainEventsMethod
+        #endregion GetDomainEventsMarkedForCommitMethod
 
-        #region ClearUncommitedDomainEventsMethod
+        #region MarkDomainEventsAsCommittedMethod
 
         public class ClearUncommitedDomainEventsMethod
         {
@@ -87,6 +88,6 @@ namespace Xer.DomainDriven.Tests
             }
         }
 
-        #endregion ClearUncommitedDomainEventsMethod
+        #endregion MarkDomainEventsAsCommittedMethod
     }
 }

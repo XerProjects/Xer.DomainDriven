@@ -71,7 +71,7 @@ namespace Xer.DomainDriven
                 throw new ArgumentNullException(nameof(domainEventToAppend));
             }
 
-            if (!AggregateRootId.Equals(domainEventToAppend.AggregateRootId))
+            if (AggregateRootId != domainEventToAppend.AggregateRootId)
             {
                 throw new InvalidOperationException("Cannot append domain event belonging to a different aggregate root.");
             }
@@ -91,7 +91,7 @@ namespace Xer.DomainDriven
                 throw new ArgumentNullException(nameof(streamToAppend));
             }
 
-            if (!AggregateRootId.Equals(streamToAppend.AggregateRootId))
+            if (AggregateRootId != streamToAppend.AggregateRootId)
             {
                 throw new InvalidOperationException("Cannot append domain events belonging to a different aggregate root.");
             }
