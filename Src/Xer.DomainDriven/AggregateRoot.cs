@@ -4,7 +4,7 @@ using Xer.DomainDriven.Exceptions;
 
 namespace Xer.DomainDriven
 {
-    public abstract class AggregateRoot : Entity, IAggregateRoot, IEquatable<IAggregateRoot>
+    public abstract class AggregateRoot : Entity, IAggregateRoot
     {
         #region Declarations
         
@@ -59,67 +59,6 @@ namespace Xer.DomainDriven
         }
 
         #endregion IAggregateRoot implementation
-
-        #region Methods
-        
-        /// <summary>
-        /// Determine if object is equal by identity.
-        /// </summary>
-        /// <param name="other">Other object.</param>
-        /// <returns>True, if aggregate roots are equal by identity. Otherwise, false.</returns>
-        public override bool Equals(object other)
-        {
-            return Equals(other as IAggregateRoot);
-        }
-
-        /// <summary>
-        /// Determine if aggregate root is equal by identity.
-        /// </summary>
-        /// <param name="other">Other aggregate root.</param>
-        /// <returns>True, if aggregate roots are equal by identity. Otherwise, false.</returns>
-        public virtual bool Equals(IAggregateRoot other)
-        {
-            return base.Equals(other);
-        }
-
-        /// <summary>
-        /// Equality operator.
-        /// </summary>
-        /// <param name="aggregateRoot1">First aggregate root.</param>
-        /// <param name="aggregateRoot2">Second aggregate root.</param>
-        /// <returns>True, if aggregate roots are equal by identity. Otherwise, false.</returns>
-        public static bool operator ==(AggregateRoot aggregateRoot1, AggregateRoot aggregateRoot2)
-        {
-            if (ReferenceEquals(aggregateRoot1, null) && ReferenceEquals(aggregateRoot2, null))
-                return true;
-
-            if (!ReferenceEquals(aggregateRoot1, null))
-                return aggregateRoot1.Equals(aggregateRoot2);
-
-            return false;
-        }
-
-        /// <summary>
-        /// Ineuality operator.
-        /// </summary>
-        /// <param name="aggregateRoot1">First aggregate root.</param>
-        /// <param name="aggregateRoot2">Second aggregate root.</param>
-        /// <returns>True, if aggregate roots are not equal by identity. Otherwise, false.</returns>
-        public static bool operator !=(AggregateRoot aggregateRoot1, AggregateRoot aggregateRoot2)
-        {
-            return !(aggregateRoot1 == aggregateRoot2);
-        }
-
-        /// <summary>
-        /// Generate hash code from ID.
-        /// </summary>
-        /// <returns>Hash code generated from ID.</returns>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        #endregion Methods
 
         #region Protected Methods
 

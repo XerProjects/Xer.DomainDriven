@@ -2,22 +2,28 @@
 
 namespace Xer.DomainDriven
 {
-    public abstract class Entity : IEntity, IEquatable<IEntity>
+    public abstract class Entity : IEntity
     {
+        #region Properties
+        
         /// <summary>
         /// Unique ID.
         /// </summary>
         public Guid Id { get; protected set; }
 
         /// <summary>
-        /// Date when entitity was created.
+        /// Date when entitity was created. This will default to <see cref="DateTime.UtcNow"/> if no value has been provided in constructor.
         /// </summary>
         public DateTime Created { get; protected set; }
 
         /// <summary>
-        /// Date when entity was last updated.
+        /// Date when entity was last updated. This will default to <see cref="DateTime.UtcNow"/> if no value has been provided in constructor.
         /// </summary>
         public DateTime Updated { get; protected set; }
+
+        #endregion Properties
+
+        #region Constructors
 
         /// <summary>
         /// Constructor.
@@ -46,72 +52,25 @@ namespace Xer.DomainDriven
             Updated = updated;
         }
 
+        #endregion Constructors
+
+        #region Methods
+        
         /// <summary>
-        /// Determine if object is equal by identity.
+        /// Check if entity has the same identity as this entity instance.
         /// </summary>
-        /// <param name="other">Other object.</param>
-        /// <returns>True, if entities are equal by identity. Otherwise, false.</returns>
-        public override bool Equals(object other)
+        /// <param name="entity">Entity.</param>
+        /// <returns>True if entities have the same identity. Otherwise, false.</returns>
+        public virtual bool IsSameAs(IEntity entity)
         {
-            return Equals(other as IEntity);
-        }
-
-        /// <summary>
-        /// Determine if entity is equal by identity.
-        /// </summary>
-        /// <param name="other">Other entity.</param>
-        /// <returns>True, if entities are equal by identity. Otherwise, false.</returns>
-        public virtual bool Equals(IEntity other)
-        {
-            if (ReferenceEquals(other, null))
-                return false;
-
-            if (ReferenceEquals(this, other))
-                return true;
-
-            if (this.GetType() != other.GetType())
-                return false;
-
-            return Id == other.Id; 
-        }
-
-        /// <summary>
-        /// Equality operator.
-        /// </summary>
-        /// <param name="entity1">First entity.</param>
-        /// <param name="entity2">Second entity.</param>
-        /// <returns>True, if entities are equal by identity. Otherwise, false.</returns>
-        public static bool operator ==(Entity e1, Entity e2)
-        {
-            if (ReferenceEquals(e1, null) && ReferenceEquals(e2, null))
-                return true;
-
-            if (!ReferenceEquals(e1, null))
+            if (entity == null)
             {
-                return e1.Equals(e2);
+                throw new ArgumentNullException(nameof(entity));
             }
 
-            return false;
+            return Id == entity.Id;
         }
 
-        /// <summary>
-        /// Inequality operator.
-        /// </summary>
-        /// <param name="entity1">First entity.</param>
-        /// <param name="entity2">Second entity.</param>
-        /// <returns>True, if entities are not equal by identity. Otherwise, false.</returns>
-        public static bool operator !=(Entity entity1, Entity entity2)
-        {
-            return !(entity1 == entity2);
-        }
-
-        /// <summary>
-        /// Generate hash code from ID.
-        /// </summary>
-        /// <returns>Hash code generated from ID.</returns>
-        public override int GetHashCode()
-        {
-            return Id.GetHashCode();
-        }
+        #endregion Methods
     }
 }

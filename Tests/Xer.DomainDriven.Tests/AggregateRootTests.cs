@@ -9,134 +9,6 @@ namespace Xer.DomainDriven.Tests
 {
     public class AggregateRootTests
     {
-        #region Equality
-        
-        public class Equality
-        {
-            [Fact]
-            public void EqualsShouldBeTrueIfSameId()
-            {
-                var id = Guid.NewGuid();
-                var aggregateRoot1 = new TestAggregateRoot(id);
-                var aggregateRoot2 = new TestAggregateRoot(id);
-
-                // Same ID, should be equal.
-                aggregateRoot1.Equals(aggregateRoot2).Should().BeTrue();
-            }
-
-            [Fact]
-            public void EqualsShouldBeTrueIfSameReference()
-            {
-                var aggregateRoot1 = new TestAggregateRoot(Guid.NewGuid());
-                var sameReference = aggregateRoot1;
-
-                // Same ID, should be equal.
-                aggregateRoot1.Equals(sameReference).Should().BeTrue();
-            }
-
-            [Fact]
-            public void ObjectEqualsShouldBeTrueIfSameId()
-            {
-                var id = Guid.NewGuid();
-                var aggregateRoot1 = new TestAggregateRoot(id);
-                var aggregateRoot2 = new TestAggregateRoot(id);
-
-                // Same ID, should be equal.
-                aggregateRoot1.Equals((object)aggregateRoot2).Should().BeTrue();
-            }
-
-            [Fact]
-            public void ObjectEqualsShouldBeTrueIfSameReference()
-            {
-                var aggregateRoot1 = new TestAggregateRoot(Guid.NewGuid());
-                var sameReference = aggregateRoot1;
-
-                // Same ID, should be equal.
-                aggregateRoot1.Equals((object)sameReference).Should().BeTrue();
-            }
-
-            [Fact]
-            public void EqualityOperatorShouldBeTrueIfSameId()
-            {
-                var id = Guid.NewGuid();
-                var aggregateRoot1 = new TestAggregateRoot(id);
-                var aggregateRoot2 = new TestAggregateRoot(id);
-
-                // Same ID, should be equal.
-                (aggregateRoot1 == aggregateRoot2).Should().BeTrue();
-            }
-
-            [Fact]
-            public void EqualityOperatorShouldBeTrueIfSameReference()
-            {
-                var aggregateRoot1 = new TestAggregateRoot(Guid.NewGuid());
-                var sameReference = aggregateRoot1;
-
-                // Same ID, should be equal.
-                (aggregateRoot1 == sameReference).Should().BeTrue();
-            }
-
-            [Fact]
-            public void ShouldNotBeEqualIfSameIdButDifferentType()
-            {
-                var id = Guid.NewGuid();
-                var aggregateRoot1 = new TestAggregateRoot(id);
-                var aggregateRoot2 = new NoApplierAggregateRoot(id);
-
-                // Same ID, should be equal.
-                aggregateRoot1.Should().NotBe(aggregateRoot2);
-            }
-        }
-
-        #endregion Equality
-
-        #region GetHashCodeMethod
-        
-        public class GetHashCodeMethod
-        {
-            [Fact]
-            public void ShouldReturnTheSameValueForSameInstance()
-            {
-                var aggregateRoot = new TestAggregateRoot(Guid.NewGuid());
-                int hashCode1 = aggregateRoot.GetHashCode();
-                int hashCode2 = aggregateRoot.GetHashCode();
-
-                hashCode1.Should().Be(hashCode2);
-            }
-
-            [Fact]
-            public void ShouldBeSearcheableInHashSet()
-            {
-                var id = Guid.NewGuid();
-                var aggregateRoot1 = new TestAggregateRoot(id);
-                var aggregateRoot2 = new TestAggregateRoot(id);
-
-                var hashSet = new HashSet<TestAggregateRoot>();
-                hashSet.Add(aggregateRoot1);
-
-                // Should be searcheable because aggregate roots are equal by ID.
-                hashSet.Contains(aggregateRoot1).Should().BeTrue();
-                hashSet.Contains(aggregateRoot2).Should().BeTrue();
-            }
-
-            [Fact]
-            public void ShouldBeSearcheableInDictionary()
-            {
-                var id = Guid.NewGuid();
-                var aggregateRoot1 = new TestAggregateRoot(id);
-                var aggregateRoot2 = new TestAggregateRoot(id);
-
-                var dictionary = new Dictionary<TestAggregateRoot, TestAggregateRoot>(1);
-                dictionary[aggregateRoot1] = aggregateRoot1;
-
-                // Should be searcheable because aggregate roots are equal by ID.
-                dictionary[aggregateRoot1].Should().Be(aggregateRoot1);
-                dictionary[aggregateRoot2].Should().Be(aggregateRoot1);
-            }
-        }
-
-        #endregion GetHashCodeMethod
-
         #region ApplyDomainEventMethod
         
         public class ApplyDomainEventMethod
@@ -173,7 +45,7 @@ namespace Xer.DomainDriven.Tests
 
         #region GetUncommittedDomainEventsMethod
 
-        public class GetUncommittedDomainEventsMethod
+        public class GetDomainEventsMarkedForCommitMethod
         {
             [Fact]
             public void ShouldIncludeAppliedDomainEvent()
@@ -190,9 +62,9 @@ namespace Xer.DomainDriven.Tests
             }
         }
 
-        #endregion GetUncommittedDomainEventsMethod
+        #endregion GetDomainEventsMarkedForCommitMethod
 
-        #region ClearUncommitedDomainEventsMethod
+        #region MarkDomainEventsAsCommittedMethod
 
         public class ClearUncommitedDomainEventsMethod
         {
@@ -216,6 +88,6 @@ namespace Xer.DomainDriven.Tests
             }
         }
 
-        #endregion ClearUncommitedDomainEventsMethod
+        #endregion MarkDomainEventsAsCommittedMethod
     }
 }
