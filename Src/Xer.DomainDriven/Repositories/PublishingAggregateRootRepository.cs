@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 
 namespace Xer.DomainDriven.Repositories
 {
-    public class PublishingRepository<TAggregateRoot> : IAggregateRootRepository<TAggregateRoot>
-                                                        where TAggregateRoot : IAggregateRoot
+    public class PublishingAggregateRootRepository<TAggregateRoot> : IAggregateRootRepository<TAggregateRoot>
+                                                                     where TAggregateRoot : IAggregateRoot
     {
         private readonly IAggregateRootRepository<TAggregateRoot> _inner;
         private readonly IDomainEventPublisher _domainEventPublisher;
@@ -15,8 +15,8 @@ namespace Xer.DomainDriven.Repositories
         /// </summary>
         /// <param name="inner">Aggregate root repository to decorate.</param>
         /// <param name="domainEventPublisher">Domain event publisher.</param>
-        public PublishingRepository(IAggregateRootRepository<TAggregateRoot> inner, 
-                                    IDomainEventPublisher domainEventPublisher)
+        public PublishingAggregateRootRepository(IAggregateRootRepository<TAggregateRoot> inner, 
+                                                 IDomainEventPublisher domainEventPublisher)
         {
             _inner = inner;
             _domainEventPublisher = domainEventPublisher;

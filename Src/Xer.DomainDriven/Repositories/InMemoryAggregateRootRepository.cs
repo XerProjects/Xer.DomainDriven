@@ -69,11 +69,7 @@ namespace Xer.DomainDriven.Repositories
         /// <returns>Asynchronous task.</returns>
         public Task SaveAsync(TAggregateRoot aggregateRoot, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (_aggregateRoots.Contains(aggregateRoot))
-            {
-                _aggregateRoots.Remove(aggregateRoot);
-            }
-
+            _aggregateRoots.RemoveAll(a => a.Id == aggregateRoot.Id);
             _aggregateRoots.Add(aggregateRoot);
 
             return CompletedTask;
