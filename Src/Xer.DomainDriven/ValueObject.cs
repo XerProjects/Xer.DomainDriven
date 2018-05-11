@@ -43,6 +43,12 @@ namespace Xer.DomainDriven
             if (other == null)
                 return false;
 
+            if (ReferenceEquals(this, other))
+                return true;
+                
+            if (this.GetType() != other.GetType())
+                return false;
+
             return ValueEquals(other);
         }
         
@@ -59,7 +65,7 @@ namespace Xer.DomainDriven
                 return true;
             }
 
-            if (!ReferenceEquals(obj1, null) && !ReferenceEquals(obj2, null))
+            if (!ReferenceEquals(obj1, null))
             {
                 return obj1.Equals(obj2);
             }
