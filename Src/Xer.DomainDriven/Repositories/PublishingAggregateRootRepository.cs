@@ -16,7 +16,7 @@ namespace Xer.DomainDriven.Repositories
         /// <param name="inner">Aggregate root repository to decorate.</param>
         /// <param name="domainEventPublisher">Domain event publisher.</param>
         public PublishingAggregateRootRepository(IAggregateRootRepository<TAggregateRoot> inner, 
-                                    IDomainEventPublisher domainEventPublisher)
+                                                 IDomainEventPublisher domainEventPublisher)
         {
             _inner = inner;
             _domainEventPublisher = domainEventPublisher;

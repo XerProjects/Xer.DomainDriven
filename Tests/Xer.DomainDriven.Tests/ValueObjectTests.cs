@@ -123,7 +123,7 @@ namespace Xer.DomainDriven.Tests
                 var valueObject1 = new TestValueObject("Test", 123);
                 var valueObject2 = new TestValueObjectSecond("Test", 123);
 
-                // Same ID, should be equal.
+                // Same value, should be equal.
                 valueObject1.Should().NotBe(valueObject2);
             }
         }
