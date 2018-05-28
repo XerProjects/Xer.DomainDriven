@@ -21,7 +21,7 @@ namespace Xer.DomainDriven
         /// Snapshot of the current domain events that are marked for commit.
         /// </summary>
         /// <returns>Readonly collection of domain events that are marked for commit.</returns>
-        protected IEnumerable<IDomainEvent> DomainEventsForCommit => new ReadOnlyCollection<IDomainEvent>(_domainEventsForCommit.ToList());
+        protected IDomainEventStream DomainEventsForCommit => new DomainEventStream(Id, _domainEventsForCommit);
 
         #endregion Properties
 
