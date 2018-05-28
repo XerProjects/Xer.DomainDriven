@@ -19,7 +19,7 @@ namespace Xer.DomainDriven.Tests.Entities
 
         protected override HashCode GenerateHashCode()
         {
-            return HashCode.From(Number, Data);
+            return HashCode.New.Combine(Number).Combine(Data);
         }
     }
 

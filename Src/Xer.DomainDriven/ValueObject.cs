@@ -2,7 +2,7 @@
 
 namespace Xer.DomainDriven
 {
-    public abstract class ValueObject<TSelf> : IEquatable<TSelf> where TSelf : class
+    public abstract partial class ValueObject<TSelf> : IEquatable<TSelf> where TSelf : class
     {
         #region Protected Methods
             
@@ -69,7 +69,7 @@ namespace Xer.DomainDriven
             {
                 return obj1.Equals(obj2);
             }
-
+            
             return false;
         }
 
@@ -94,63 +94,5 @@ namespace Xer.DomainDriven
         }
 
         #endregion Equality Operators
-
-        #region HashCode Class
-        
-        /// <summary>
-        /// Represents a hash code.
-        /// </summary>
-        protected struct HashCode
-        {
-            private int _value;
-            
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            /// <param name="fields">Value object fields.</param>
-            private HashCode(object[] fields)
-            {
-                if (fields == null)
-                {
-                    throw new ArgumentNullException(nameof(fields));
-                }
-
-                if (fields.Length == 0)
-                    _value = 0;
-
-                unchecked
-                {                    
-                    int hash = 19;
-
-                    for (int i = 0; fields.Length > i; i++)
-                    {
-                        hash = hash * 486187739 + fields[i]?.GetHashCode() ?? throw new ArgumentException("Cannot pass null as field.", nameof(fields));
-                    }
-                    
-                    _value = hash;                
-                }
-            }
-
-            /// <summary>
-            /// Implicit conversion from HashCode to int.
-            /// </summary>
-            /// <param name="hashCode">HashCode.</param>
-            public static implicit operator int(HashCode hashCode)
-            {
-                return hashCode._value;
-            }
-
-            /// <summary>
-            /// Create HashCode derived from the list of fields.
-            /// </summary>
-            /// <param name="fields">Value object fields.</param>
-            /// <returns>HashCode instance.</returns>
-            public static HashCode From(params object[] fields)
-            {
-                return new HashCode(fields);
-            }
-        }
-
-        #endregion HashCode Class
     }
 }

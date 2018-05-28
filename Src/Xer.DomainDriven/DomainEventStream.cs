@@ -41,6 +41,7 @@ namespace Xer.DomainDriven
 
         /// <summary>
         /// Constructs a new instance of a read-only stream.
+        /// This creates a copy of the provided domain events.
         /// </summary>
         /// <param name="aggregateRootId">Id of the aggregate root which owns this stream.</param>
         /// <param name="domainEvents">Domain events.</param>
