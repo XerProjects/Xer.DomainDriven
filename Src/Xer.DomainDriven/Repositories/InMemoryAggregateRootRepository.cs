@@ -55,7 +55,7 @@ namespace Xer.DomainDriven.Repositories
 
             if (aggregateRoot == null && _throwIfAggregateRootIsNotFound)
             {
-                return TaskFromException<TAggregateRoot>(new AggregateRootNotFoundException($"Aggregate root with ID {aggregateRootId} was not found."));
+                return TaskFromException<TAggregateRoot>(new AggregateRootNotFoundException(aggregateRootId, $"Aggregate root with ID {aggregateRootId} was not found."));
             }
 
             return Task.FromResult(aggregateRoot);
