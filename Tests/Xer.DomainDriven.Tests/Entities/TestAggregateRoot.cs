@@ -10,17 +10,19 @@ namespace Xer.DomainDriven.Tests.Entities
         public IReadOnlyCollection<Guid> HandledChangeIDs => _handledChangeIDs.AsReadOnly();
 
         public TestAggregateRoot(Guid aggregateRootId) 
-            : base(aggregateRootId)
+            : this(aggregateRootId, DateTime.UtcNow, DateTime.UtcNow)
         {
-            RegisterDomainEventApplier<AggregateRootChangedDomainEvent>(OnTestAggregateRootChangedEvent);
-            RegisterDomainEventApplier<ExceptionCausingDomainEvent>(OnExceptionCausingDomainEvent);
         }
 
         public TestAggregateRoot(Guid aggregateRootId, DateTime createdUtc, DateTime updatedUtc) 
             : base(aggregateRootId, createdUtc, updatedUtc)
         {
-            RegisterDomainEventApplier<AggregateRootChangedDomainEvent>(OnTestAggregateRootChangedEvent);
-            RegisterDomainEventApplier<ExceptionCausingDomainEvent>(OnExceptionCausingDomainEvent);
+            Configure(c => 
+            {
+                c.RequireApplyActions();
+                c.Apply<AggregateRootChangedDomainEvent>().With(OnTestAggregateRootChangedEvent);
+                c.Apply<ExceptionCausingDomainEvent>().With(OnExceptionCausingDomainEvent);
+            });
         }
 
         public void ChangeMe(Guid changeId)
@@ -49,14 +51,38 @@ namespace Xer.DomainDriven.Tests.Entities
         }
     }
 
-    public class NoApplierAggregateRoot : AggregateRoot
+    public class ApplierRequiredAggregateRoot : AggregateRoot
     {
-        public NoApplierAggregateRoot(Guid aggregateRootId) 
-            : base(aggregateRootId)
+        public ApplierRequiredAggregateRoot(Guid aggregateRootId) 
+            : this(aggregateRootId, DateTime.UtcNow, DateTime.UtcNow)
         {
         }
 
-        public NoApplierAggregateRoot(Guid aggregateRootId, DateTime created, DateTime updated) 
+        public ApplierRequiredAggregateRoot(Guid aggregateRootId, DateTime created, DateTime updated) 
+            : base(aggregateRootId, created, updated)
+        {
+            Configure(c =>
+            {
+                c.RequireApplyActions();
+                // No domain event applier was registered.
+            });
+        }
+
+        public void ChangeMe(Guid changeId)
+        {
+            ApplyDomainEvent(new AggregateRootChangedDomainEvent(Id, changeId));
+        }
+    }
+
+    // Aggregate root with no configured domain event appliers.
+    public class DefaultAggregateRoot : AggregateRoot
+    {
+        public DefaultAggregateRoot(Guid aggregateRootId) 
+            : this(aggregateRootId, DateTime.UtcNow, DateTime.UtcNow)
+        {
+        }
+
+        public DefaultAggregateRoot(Guid aggregateRootId, DateTime created, DateTime updated) 
             : base(aggregateRootId, created, updated)
         {
         }

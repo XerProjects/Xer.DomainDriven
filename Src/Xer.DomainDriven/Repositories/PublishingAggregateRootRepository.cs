@@ -7,18 +7,18 @@ namespace Xer.DomainDriven.Repositories
     public class PublishingAggregateRootRepository<TAggregateRoot> : IAggregateRootRepository<TAggregateRoot>
                                                                      where TAggregateRoot : IAggregateRoot
     {
-        private readonly IAggregateRootRepository<TAggregateRoot> _inner;
+        private readonly IAggregateRootRepository<TAggregateRoot> _decoratedRepository;
         private readonly IDomainEventPublisher _domainEventPublisher;
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="inner">Aggregate root repository to decorate.</param>
+        /// <param name="repositoryToDecorate">Aggregate root repository to decorate.</param>
         /// <param name="domainEventPublisher">Domain event publisher.</param>
-        public PublishingAggregateRootRepository(IAggregateRootRepository<TAggregateRoot> inner, 
+        public PublishingAggregateRootRepository(IAggregateRootRepository<TAggregateRoot> repositoryToDecorate, 
                                                  IDomainEventPublisher domainEventPublisher)
         {
-            _inner = inner;
+            _decoratedRepository = repositoryToDecorate;
             _domainEventPublisher = domainEventPublisher;
         }
 
@@ -29,7 +29,7 @@ namespace Xer.DomainDriven.Repositories
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Instance of aggregate root.</returns>
         public Task<TAggregateRoot> GetByIdAsync(Guid aggregateRootId, CancellationToken cancellationToken = default(CancellationToken))
-            => _inner.GetByIdAsync(aggregateRootId, cancellationToken);
+            => _decoratedRepository.GetByIdAsync(aggregateRootId, cancellationToken);
 
         /// <summary>
         /// Save aggregate root and publish uncommitted domain events.
@@ -43,7 +43,7 @@ namespace Xer.DomainDriven.Repositories
             IDomainEventStream domainEventsCopy = aggregateRoot.GetDomainEventsMarkedForCommit();
 
             // Save aggregate root.
-            await _inner.SaveAsync(aggregateRoot);
+            await _decoratedRepository.SaveAsync(aggregateRoot);
 
             // Publish after saving.
             await _domainEventPublisher.PublishAsync(domainEventsCopy);
