@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace Xer.DomainDriven
 {
+    /// <summary>
+    /// Represents a type that holds a collection/stream of domain events.
+    /// </summary>
     public interface IDomainEventStream : IEnumerable<IDomainEvent>
     {
         /// <summary>

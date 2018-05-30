@@ -5,11 +5,14 @@ using System.Linq;
 
 namespace Xer.DomainDriven
 {
+    /// <summary>
+    /// Represents a type that holds a collection/stream of domain events.
+    /// </summary>
     public class DomainEventStream : IDomainEventStream, IEnumerable<IDomainEvent>
     {
         #region Declarations
         
-        private readonly List<IDomainEvent> _domainEvents;
+        private readonly IDomainEvent[] _domainEvents;
 
         #endregion Declarations
 
@@ -36,12 +39,11 @@ namespace Xer.DomainDriven
         public DomainEventStream(Guid aggreggateRootId)
         {
             AggregateRootId = aggreggateRootId;
-            _domainEvents = new List<IDomainEvent>();
+            _domainEvents = new IDomainEvent[0];
         }
 
         /// <summary>
         /// Constructs a new instance of a read-only stream.
-        /// This creates a copy of the provided domain events.
         /// </summary>
         /// <param name="aggregateRootId">Id of the aggregate root which owns this stream.</param>
         /// <param name="domainEvents">Domain events.</param>
@@ -52,10 +54,10 @@ namespace Xer.DomainDriven
                 throw new ArgumentNullException(nameof(domainEvents));
             }
 
-            _domainEvents = domainEvents.ToList();
+            _domainEvents = domainEvents.ToArray();
 
             AggregateRootId = aggregateRootId;
-            DomainEventCount = _domainEvents.Count;
+            DomainEventCount = _domainEvents.Length;
         }
 
         #endregion Constructors
@@ -72,11 +74,11 @@ namespace Xer.DomainDriven
                 throw new ArgumentNullException(nameof(domainEventToAppend));
             }
 
-            if (AggregateRootId != domainEventToAppend.AggregateRootId)
+            if (!AggregateRootId.Equals(domainEventToAppend.AggregateRootId))
             {
                 throw new InvalidOperationException("Cannot append domain event belonging to a different aggregate root.");
             }
-
+            
             return new DomainEventStream(AggregateRootId, this.Concat(new[] { domainEventToAppend }));
         }
 
@@ -92,7 +94,7 @@ namespace Xer.DomainDriven
                 throw new ArgumentNullException(nameof(streamToAppend));
             }
 
-            if (AggregateRootId != streamToAppend.AggregateRootId)
+            if (!AggregateRootId.Equals(streamToAppend.AggregateRootId))
             {
                 throw new InvalidOperationException("Cannot append domain events belonging to a different aggregate root.");
             }

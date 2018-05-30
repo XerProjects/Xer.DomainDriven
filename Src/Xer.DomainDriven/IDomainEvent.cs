@@ -2,6 +2,9 @@ using System;
 
 namespace Xer.DomainDriven
 {
+    /// <summary>
+    /// Represents an event that has occurred within a domain.
+    /// </summary>
     public interface IDomainEvent
     {
         /// <summary>
@@ -12,6 +15,6 @@ namespace Xer.DomainDriven
         /// <summary>
         /// Timestamp.
         /// </summary>
-        DateTime TimeStamp { get; }
+        DateTimeOffset TimeStamp { get; }
     }
 }

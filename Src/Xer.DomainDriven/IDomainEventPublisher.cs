@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace Xer.DomainDriven
 {
+    /// <summary>
+    /// Represents a type that publishes domain events.
+    /// </summary>
     public interface IDomainEventPublisher
     {
         /// <summary>

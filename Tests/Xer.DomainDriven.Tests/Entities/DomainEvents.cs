@@ -8,7 +8,7 @@ namespace Xer.DomainDriven.Tests.Entities
 
         public Guid AggregateRootId { get; }
 
-        public DateTime TimeStamp { get; } = DateTime.UtcNow;
+        public DateTimeOffset TimeStamp { get; } = DateTimeOffset.UtcNow;
 
         public AggregateRootChangedDomainEvent(Guid aggregateRootId, Guid changeId)
         {
@@ -21,7 +21,7 @@ namespace Xer.DomainDriven.Tests.Entities
     {
         public Guid AggregateRootId { get; }
 
-        public DateTime TimeStamp { get; } = DateTime.UtcNow;
+        public DateTimeOffset TimeStamp { get; } = DateTimeOffset.UtcNow;
 
         public ExceptionCausingDomainEvent(Guid aggregateRootId)
         {

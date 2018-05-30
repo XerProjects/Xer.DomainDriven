@@ -4,6 +4,12 @@ using System.Threading.Tasks;
 
 namespace Xer.DomainDriven.Repositories
 {
+    /// <summary>
+    /// Represents a aggregate root repository decorator that publishes all uncommitted domain events
+    /// after the decorated aggregate root repository saves to the storage mechanism.
+    /// </summary>
+    /// <typeparam name="TAggregateRoot">Type of aggregate root that this repository stores.</typeparam>
+
     public class PublishingAggregateRootRepository<TAggregateRoot> : IAggregateRootRepository<TAggregateRoot>
                                                                      where TAggregateRoot : IAggregateRoot
     {
