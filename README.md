@@ -26,7 +26,7 @@ public class OrderAggregateRoot : AggregateRoot
     {
         // Apply domain events to be committed and published by repository.
         // Include line item IDs in event.
-        ApplyDomainEvent(new OrderCancelledEvent(Id));
+        ApplyDomainEvent(new OrderCancelledEvent(Id, _lineItems.Select(li => li.Id)));
     }
 }
 ```
