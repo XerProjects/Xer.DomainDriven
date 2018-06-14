@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Xer.DomainDriven.DomainEventAppliers;
 
 namespace Xer.DomainDriven.Tests.Entities
 {
@@ -9,6 +10,8 @@ namespace Xer.DomainDriven.Tests.Entities
 
         public IReadOnlyCollection<Guid> HandledChangeIDs => _handledChangeIDs.AsReadOnly();
 
+        protected override IDomainEventApplier DomainEventApplier { get; }
+
         public TestAggregateRoot(Guid aggregateRootId) 
             : this(aggregateRootId, DateTime.UtcNow, DateTime.UtcNow)
         {
@@ -17,9 +20,8 @@ namespace Xer.DomainDriven.Tests.Entities
         public TestAggregateRoot(Guid aggregateRootId, DateTime createdUtc, DateTime updatedUtc) 
             : base(aggregateRootId, createdUtc, updatedUtc)
         {
-            Configure(c => 
+            DomainEventApplier = new DelegatingDomainEventApplier(c =>
             {
-                c.RequireApplyActions();
                 c.Apply<AggregateRootChangedDomainEvent>().With(OnTestAggregateRootChangedEvent);
                 c.Apply<ExceptionCausingDomainEvent>().With(OnExceptionCausingDomainEvent);
             });
@@ -27,12 +29,12 @@ namespace Xer.DomainDriven.Tests.Entities
 
         public void ChangeMe(Guid changeId)
         {
-            ApplyDomainEvent(new AggregateRootChangedDomainEvent(Id, changeId));
+            DomainEventApplier.Apply(new AggregateRootChangedDomainEvent(Id, changeId));
         }
         
         public void ThrowAnException()
         {
-            ApplyDomainEvent(new ExceptionCausingDomainEvent(Id));
+            DomainEventApplier.Apply(new ExceptionCausingDomainEvent(Id));
         }
 
         public bool HasHandledChangeId(Guid changeId)
@@ -53,6 +55,8 @@ namespace Xer.DomainDriven.Tests.Entities
 
     public class ApplierRequiredAggregateRoot : AggregateRoot
     {
+        protected override IDomainEventApplier DomainEventApplier { get; }
+        
         public ApplierRequiredAggregateRoot(Guid aggregateRootId) 
             : this(aggregateRootId, DateTime.UtcNow, DateTime.UtcNow)
         {
@@ -61,16 +65,15 @@ namespace Xer.DomainDriven.Tests.Entities
         public ApplierRequiredAggregateRoot(Guid aggregateRootId, DateTime created, DateTime updated) 
             : base(aggregateRootId, created, updated)
         {
-            Configure(c =>
+            DomainEventApplier = new DelegatingDomainEventApplier(c =>
             {
-                c.RequireApplyActions();
-                // No domain event applier was registered.
+                
             });
         }
 
         public void ChangeMe(Guid changeId)
         {
-            ApplyDomainEvent(new AggregateRootChangedDomainEvent(Id, changeId));
+            DomainEventApplier.Apply(new AggregateRootChangedDomainEvent(Id, changeId));
         }
     }
 
@@ -89,7 +92,7 @@ namespace Xer.DomainDriven.Tests.Entities
 
         public void ChangeMe(Guid changeId)
         {
-            ApplyDomainEvent(new AggregateRootChangedDomainEvent(Id, changeId));
+            DomainEventApplier.Apply(new AggregateRootChangedDomainEvent(Id, changeId));
         }
     }
 }
