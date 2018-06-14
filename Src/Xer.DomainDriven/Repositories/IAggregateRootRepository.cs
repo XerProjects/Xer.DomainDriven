@@ -4,6 +4,10 @@ using System.Threading.Tasks;
 
 namespace Xer.DomainDriven.Repositories
 {
+    /// <summary>
+    /// Represents a type that knows how to retrieve and save an aggregate root.
+    /// </summary>
+    /// <typeparam name="TAggregateRoot">Type of aggregate root that this repository stores.</typeparam>
     public interface IAggregateRootRepository<TAggregateRoot> where TAggregateRoot : IAggregateRoot
     {
         /// <summary>

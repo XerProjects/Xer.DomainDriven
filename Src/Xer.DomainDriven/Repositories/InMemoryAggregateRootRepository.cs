@@ -7,6 +7,10 @@ using Xer.DomainDriven.Exceptions;
 
 namespace Xer.DomainDriven.Repositories
 {
+    /// <summary>
+    /// Represents an implementation of aggregate root repository which uses an in-memory storage mechanism.
+    /// </summary>
+    /// <typeparam name="TAggregateRoot">Type of aggregate root that this repository stores.</typeparam>
     public class InMemoryAggregateRootRepository<TAggregateRoot> : IAggregateRootRepository<TAggregateRoot> 
                                                                    where TAggregateRoot : IAggregateRoot
     {

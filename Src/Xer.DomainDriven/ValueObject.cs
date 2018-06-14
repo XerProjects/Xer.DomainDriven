@@ -2,6 +2,15 @@
 
 namespace Xer.DomainDriven
 {
+    /// <summary>
+    /// Represents a type that is distinguishable only by the state of its properties.
+    /// </summary>
+    /// <remarks>
+    /// Two value objects that has the same properties are to be considered equal.
+    /// Value objects should be implemented as immutable. Hence, all modifications to
+    /// a value object should return a new instance with the updated properties.
+    /// </remarks>
+    /// <typeparam name="TSelf">Type of the derived class.</typeparam>
     public abstract partial class ValueObject<TSelf> : IEquatable<TSelf> where TSelf : class
     {
         #region Protected Methods

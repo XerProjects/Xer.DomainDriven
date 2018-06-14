@@ -38,7 +38,7 @@ namespace Xer.DomainDriven.Tests
             {
                 // Given.
                 var aggregateRoot = new TestAggregateRoot(Guid.NewGuid());
-                DateTime aggregateRootUpdated = aggregateRoot.Updated;
+                DateTimeOffset aggregateRootUpdated = aggregateRoot.Updated;
                 
                 // When.
                 aggregateRoot.ChangeMe(Guid.NewGuid());

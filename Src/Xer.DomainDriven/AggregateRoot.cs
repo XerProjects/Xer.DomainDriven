@@ -6,6 +6,14 @@ using Xer.DomainDriven.Exceptions;
 
 namespace Xer.DomainDriven
 {
+    /// <summary>
+    /// Represents an entity that serves as a "root" of an aggregate - which is the term for a set/group of entities 
+    /// and value objects that needs to maintain consistency as a whole.
+    /// </summary>
+    /// <remarks>
+    /// An aggregate root is responsible for protecting the invariants of an aggregate. 
+    /// Hence, all operations to change the state of an aggregate must go through the aggregate root.
+    /// </remarks>
     public abstract partial class AggregateRoot : Entity, IAggregateRoot
     {
         #region Declarations
@@ -32,7 +40,7 @@ namespace Xer.DomainDriven
         /// </summary>
         /// <param name="aggregateRootId">Id of aggregate root.</param>
         public AggregateRoot(Guid aggregateRootId)
-            : this(aggregateRootId, DateTime.UtcNow, DateTime.UtcNow)
+            : this(aggregateRootId, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow)
         {
         }
 
@@ -42,7 +50,7 @@ namespace Xer.DomainDriven
         /// <param name="aggregateRootId">Id of aggregate root.</param>
         /// <param name="created">Created date.</param>
         /// <param name="updated">Updated date.</param>
-        public AggregateRoot(Guid aggregateRootId, DateTime created, DateTime updated)
+        public AggregateRoot(Guid aggregateRootId, DateTimeOffset created, DateTimeOffset updated)
             : base(aggregateRootId, created, updated)
         {
             _applyActionConfiguration.OnApplySuccess((e) => 

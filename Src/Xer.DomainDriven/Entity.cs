@@ -2,6 +2,12 @@
 
 namespace Xer.DomainDriven
 {
+    /// <summary>
+    /// Represents a type that is distinguishable by a unique ID.
+    /// </summary>
+    /// <remarks>
+    /// Two entities that has the same ID are to be considered equal regardless of the state of their properties.
+    /// </remarks>
     public abstract class Entity : IEntity
     {
         #region Properties
@@ -12,14 +18,16 @@ namespace Xer.DomainDriven
         public Guid Id { get; protected set; }
 
         /// <summary>
-        /// Date when entitity was created. This will default to <see cref="DateTime.UtcNow"/> if no value has been provided in constructor.
+        /// Date when entitity was created. 
+        /// This will default to <see cref="DateTimeOffset.UtcNow"/> if no value has been provided in constructor.
         /// </summary>
-        public DateTime Created { get; protected set; }
+        public DateTimeOffset Created { get; protected set; }
 
         /// <summary>
-        /// Date when entity was last updated. This will default to <see cref="DateTime.UtcNow"/> if no value has been provided in constructor.
+        /// Date when entity was last updated. 
+        /// This will default to <see cref="DateTimeOffset.UtcNow"/> if no value has been provided in constructor.
         /// </summary>
-        public DateTime Updated { get; protected set; }
+        public DateTimeOffset Updated { get; protected set; }
 
         #endregion Properties
 
@@ -29,14 +37,14 @@ namespace Xer.DomainDriven
         /// Constructor.
         /// </summary>
         /// <remarks>
-        /// This will set <see cref="Entity.Created"/> and <see cref="Entity.Updated"/> properties to <see cref="DateTime.UtcNow"/>.
+        /// This will set <see cref="Created"/> and <see cref="Updated"/> properties to <see cref="DateTimeOffset.UtcNow"/>.
         /// </remarks>
         /// <param name="entityId">ID of entity.</param>
         public Entity(Guid entityId)
         {
             Id = entityId;
-            Created = DateTime.UtcNow;
-            Updated = DateTime.UtcNow;
+            Created = DateTimeOffset.UtcNow;
+            Updated = DateTimeOffset.UtcNow;
         }
 
         /// <summary>
@@ -45,7 +53,7 @@ namespace Xer.DomainDriven
         /// <param name="entityId">ID of entity.</param>
         /// <param name="created">Created date.</param>
         /// <param name="updated">Updated date.</param>
-        public Entity(Guid entityId, DateTime created, DateTime updated)
+        public Entity(Guid entityId, DateTimeOffset created, DateTimeOffset updated)
         {
             Id = entityId;
             Created = created;
